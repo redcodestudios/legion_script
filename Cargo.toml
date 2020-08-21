@@ -1,0 +1,13 @@
+[package]
+name = "legion_script"
+version = "0.1.0"
+authors = ["Rodrigo Oliveira <rodrigo.redcode@gmail.com>"]
+edition = "2018"
+
+[build-dependencies]
+cbindgen = "0.14.4"
+cc = "1.0.59"
+
+[dependencies]
+legion = "0.2.4"
+easy_ffi = "0.1.0"
