@@ -2,4 +2,4 @@ language = "C"
 
 [parse]
 parse_deps = false
-expand = ["legion-script"]
+expand = ["legion_script"]

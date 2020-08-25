@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 void C_run_python_file(const char* script) {
-    printf("starting python\n");
+    printf("`python_vm.c`: Starting python\n");
     wchar_t *program = Py_DecodeLocale("", NULL);
     if (program == NULL) {
         fprintf(stderr, "Fatal error: cannot decode arg[0]\n");
@@ -21,4 +21,5 @@ void C_run_python_file(const char* script) {
         exit(120);
     }
     PyMem_RawFree(program);
+    printf("`python_vm.c`: Finalizing python\n");
 }
