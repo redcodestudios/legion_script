@@ -1,1 +1,4 @@
-print('`hello.py`: Hello from python')
+import engine
+
+engine.say_hello()
+engine.say_hello()
