@@ -7,9 +7,20 @@
 
 #define PY_NONE Py_BuildValue("")
 
+static unsigned long *counter = NULL;
+
+/* static unsigned long get_counter() { */
+/*     return *counter; */
+/* } */
+
+/* void set_counter(unsigned long id) { */
+/*    *counter = id; */ 
+/* } */
+
+
 typedef struct {
     PyTypeObject base;
-    long type_id;
+    unsigned long type_id;
 } MetaObject;
 
 static PyObject *
@@ -26,9 +37,10 @@ static PyMethodDef Meta_methods[] = {
 
 static PyObject *Meta_new(PyObject *cls, PyObject *args, PyObject *kwargs) {
     MetaObject *component_class = PyType_Type.tp_new(cls, args, kwargs);
-
+    
     /*** Change to actual get_id from RUST ***/
-    component_class->type_id = random();
+    *counter += 1;
+    component_class->type_id = *counter;
     return component_class;
 }
 
@@ -84,7 +96,11 @@ PyInit_engine(void)
 }
 
 /** RUN SCRIPT **/
-void C_RUN_PYSCRIPT(const char* script) {
+void C_RUN_PYSCRIPT(const char* script, unsigned long *component_id) {
+    
+    // SET RUST ID
+    counter = component_id;
+
     wchar_t *program = Py_DecodeLocale(script, NULL);
     if (program == NULL) {
         fprintf(stderr, "Fatal error: cannot decode arg[0]\n");
