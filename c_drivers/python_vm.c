@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <structmember.h>
-#include <time.h>
+#include <string.h>
 
 #define PY_NONE Py_BuildValue("")
 
@@ -17,6 +17,7 @@ static unsigned long *counter = NULL;
 /*    *counter = id; */ 
 /* } */
 
+static PyObject* py_obj_ptr = NULL;
 
 typedef struct {
     PyTypeObject base;
@@ -37,10 +38,10 @@ static PyMethodDef Meta_methods[] = {
 
 static PyObject *Meta_new(PyObject *cls, PyObject *args, PyObject *kwargs) {
     MetaObject *component_class = PyType_Type.tp_new(cls, args, kwargs);
-    
     /*** Change to actual get_id from RUST ***/
     *counter += 1;
     component_class->type_id = *counter;
+    fprintf(stderr, "CREATING COMPONENT\n"); 
     return component_class;
 }
 
@@ -73,6 +74,10 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
     for(Py_ssize_t i=0; i<args_size; i++) {
         temp = PyTuple_GetItem(args, i);
         
+        // TEST IF PTR IS CLEANED
+        py_obj_ptr = temp;
+        Py_INCREF(py_obj_ptr);
+        
         PyObject* class = PyObject_GetAttrString(temp, "__class__");
         if(class == NULL) {
             fprintf(stderr, "CLASS NOT FOUND\n");
@@ -82,6 +87,9 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
         if (id == NULL) {
             fprintf(stderr, "ID NOT FOUND \n");
         }
+        /* Py_DECREF(temp); */
+        Py_DECREF(id);
+        Py_DECREF(class);
         fprintf(stderr, "TYPE_ID: %ld\n", PyLong_AsLong(id));
         PyErr_Print();
     }
@@ -89,9 +97,23 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
     return PY_NONE;
 }
 
+static PyObject* query(PyObject *self, PyObject *args) {
+    if(py_obj_ptr == NULL) {
+        fprintf(stderr, "obj is null\n");
+    }
+    PyObject* query_result = Py_BuildValue("O", py_obj_ptr); 
+    
+    if(query_result == NULL) {
+        fprintf(stderr, "query_result null\n");
+    }
+
+    return query_result;
+}
+
 static PyMethodDef EngineMethods[] = {
     {"say_hello", say_hello, METH_VARARGS, "Say hello from python."},
     {"new_entity", new_entity, METH_VARARGS, "Create entity."},
+    {"query", query, METH_VARARGS, "Query component."},
     {NULL, NULL, 0, NULL}
 };
 
@@ -106,12 +128,10 @@ static PyObject*
 PyInit_engine(void)
 {
     PyObject* module = PyModule_Create(&EngineModule);
-    /* Py_INCREF(&PyType_Type); */
     MetaComponentType.tp_base = &PyType_Type;
     
     if (PyType_Ready(&MetaComponentType) < 0)
         printf("error\n");
-        /* return; */
 
     Py_INCREF(&MetaComponentType);
     if(PyModule_AddObject(module, "MetaComponent", &MetaComponentType) < 0) {
@@ -140,6 +160,14 @@ void C_RUN_PYSCRIPT(const char* script, unsigned long *component_id) {
     FILE *script_f = fopen(script, "r");
     PyRun_SimpleFile(script_f, script);
 
+    fprintf(stderr, "FINALIZING\n");
+    fprintf(stderr, "%s\n", script);
+
+    if(strcmp(script, "examples/python/hello2.py") == 0) {
+        /* Py_DECREF(py_obj_ptr); */ 
+        fprintf(stderr, "is hello2\n");
+    }
+    
     if (Py_FinalizeEx() < 0) {
         exit(120);
     }

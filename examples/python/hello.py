@@ -21,9 +21,6 @@ print(f'Transform type_id: {Transform.id()}')
 # print(dir(Color))
 # print(f'Color type_id: {Color.__type_id__}')
 # print(f'Transform type_id: {Transform.__type_id__}')
-c = Color(1,2,3)
-
-print(c.__class__.id())
-e = engine.new_entity(Color(1,2,3), Color(1,2,3), Transform(50,50))
+e = engine.new_entity(Color(55,2,3))
 # print(dir(c))
 

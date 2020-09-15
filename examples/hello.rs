@@ -10,9 +10,11 @@ pub fn main() {
     resources.insert::<ComponentId>(id_count);
     
     let py_script = String::from("examples/python/hello.py");
+    let py_script2 = String::from("examples/python/hello2.py");
+
 
     let mut schedule = Schedule::builder()
-        .add_system(scripting_system(py_script))
+        .add_system(scripting_system(py_script, py_script2))
         .build();
 
     schedule.execute(&mut world, &mut resources);
