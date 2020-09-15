@@ -75,8 +75,8 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
         temp = PyTuple_GetItem(args, i);
         
         // TEST IF PTR IS CLEANED
-        py_obj_ptr = temp;
-        Py_INCREF(py_obj_ptr);
+        /* py_obj_ptr = temp; */
+        /* Py_INCREF(py_obj_ptr); */
         
         PyObject* class = PyObject_GetAttrString(temp, "__class__");
         if(class == NULL) {
