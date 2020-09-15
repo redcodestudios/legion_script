@@ -63,9 +63,35 @@ static PyObject* say_hello(PyObject *self, PyObject *args) {
     return PY_NONE;
 }
 
+/** new entity **/
+static PyObject* new_entity(PyObject *self, PyObject *args) {
+    Py_ssize_t args_size = PyTuple_Size(args);
+    fprintf(stderr, "NUMBER DE ARGS %d\n", (int) args_size);
+
+    PyObject *temp;
+
+    for(Py_ssize_t i=0; i<args_size; i++) {
+        temp = PyTuple_GetItem(args, i);
+        
+        PyObject* class = PyObject_GetAttrString(temp, "__class__");
+        if(class == NULL) {
+            fprintf(stderr, "CLASS NOT FOUND\n");
+        }
+
+        PyObject* id = PyObject_CallMethodObjArgs(class, PyUnicode_FromString("id"), NULL);
+        if (id == NULL) {
+            fprintf(stderr, "ID NOT FOUND \n");
+        }
+        fprintf(stderr, "TYPE_ID: %ld\n", PyLong_AsLong(id));
+        PyErr_Print();
+    }
+    
+    return PY_NONE;
+}
+
 static PyMethodDef EngineMethods[] = {
-    {"say_hello", say_hello, METH_VARARGS,
-     "Say hello from python."},
+    {"say_hello", say_hello, METH_VARARGS, "Say hello from python."},
+    {"new_entity", new_entity, METH_VARARGS, "Create entity."},
     {NULL, NULL, 0, NULL}
 };
 
