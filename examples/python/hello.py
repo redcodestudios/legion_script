@@ -22,5 +22,13 @@ print(f'Transform type_id: {Transform.id()}')
 # print(f'Color type_id: {Color.__type_id__}')
 # print(f'Transform type_id: {Transform.__type_id__}')
 e = engine.new_entity(Color(55,2,3))
-# print(dir(c))
+# c = engine.query()
+# print(f"C {c}")
+
+# class Rotation(metaclass=engine.MetaComponent):
+#     pass
+# # print(dir(c))
+
+# c = engine.query()
+# print(f"C {c}")
 

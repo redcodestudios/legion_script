@@ -1,20 +1,35 @@
-use legion::prelude::*;
-use legion_script::system::{scripting_system, ComponentId};
+use legion::*;
+use legion_script::system::{scripting_system, Scripts, ComponentId};
 
+use std::os::raw::c_void;
+
+
+#[derive(Clone, Debug, PartialEq)]
+struct TestPTR {
+    x: *const c_void, 
+}
+
+unsafe impl Send for TestPTR {}
+unsafe impl Sync for TestPTR {}
 
 pub fn main() {
     let mut world = World::default();
     let mut resources = Resources::default();
 
-    let mut id_count = 0;
+
+    let teste = TestPTR {x: std::ptr::null()};
+    
+    world.push((teste,));
+
+    let id_count = 0;
     resources.insert::<ComponentId>(id_count);
     
-    let py_script = String::from("examples/python/hello.py");
-    let py_script2 = String::from("examples/python/hello2.py");
+    let scripts = vec![String::from("examples/python/hello.py"), String::from("examples/python/hello2.py")];
+    resources.insert::<Scripts>(scripts);
 
 
     let mut schedule = Schedule::builder()
-        .add_system(scripting_system(py_script, py_script2))
+        .add_system(scripting_system())
         .build();
 
     schedule.execute(&mut world, &mut resources);
