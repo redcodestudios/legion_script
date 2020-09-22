@@ -19,19 +19,16 @@ pub fn main() {
     // let teste = TestPTR {x: std::ptr::null()};
     
     // world.push((teste,));
-
-    let pos = Box::<Position>::new(Position{x: 1, y: 2});
-    let raw_pos = Box::into_raw(pos);
-    println!("Raw pos: {:?}", raw_pos);
-    let vec_pos = vec![raw_pos].as_ptr() as *const c_void;
-    println!("Vec pos: {:?}", vec_pos);
+    let pos = Position{x: 1, y: 2};
+    let components: *const c_void = &pos as *const _ as *const c_void;
+    // let components: &Position = unsafe { &mut *(data as *mut State) };
 
     let component_data = ComponentData {
         // number_component_types: 1,
         component_types: vec![1].as_ptr() as *const u32,
         // component_data_sizes: vec![2].as_ptr(),
         number_components: 1,
-        components: vec_pos,
+        components: components,
         layout: EntityLayout::new(),
     };
     let mut entities: Vec<Entity> = Vec::new();

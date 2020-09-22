@@ -98,10 +98,11 @@ pub fn test_query(data: &ComponentData) {
     unsafe {
     
         // let components = std::slice::from_raw_parts(data.components, 1 as usize);
-        println!("{:?}", *(data.components));
+        // println!("BBBBBBBBB {:?}", *(*(data.components).offset(1)));
+        let data: &Position =  & *(data.components as *const Position);
 
-         let pos = std::mem::transmute::<*const c_void, Position>((data.components));
-         println!("Pos x: {:?}", pos);
+         // let pos = std::mem::transmute::<*const c_void, Position>((data.components));
+         println!("Pos x: {:?}", data);
     }
 
 
