@@ -32,7 +32,7 @@ pub fn main() {
         layout: layout,
     };
     let mut entities: Vec<Entity> = Vec::new();
-    for e in world.extend_script(component_data){
+    for e in world.extend(component_data){
         entities.push(*e);
     }
 

@@ -83,7 +83,12 @@ impl LayoutFilter for ComponentDataFilter {
 
 struct ComponentDataLayout;
 struct ExternalComponent;
-
+impl storage::IntoComponentSource for ComponentData{
+    type Source = Self; 
+    fn into(self)-> Self{
+        self
+    }
+}
 impl storage::ComponentSource for ComponentData {
     
     fn push_components<'b>(&mut self, writer: &mut ArchetypeWriter<'b>, entities: impl Iterator<Item = Entity>) {
