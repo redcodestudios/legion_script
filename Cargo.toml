@@ -9,7 +9,7 @@ cbindgen = "0.14.4"
 cc = "1.0.59"
 
 [dependencies]
-legion = "0.3.0"
+legion = {path = "./legion"}
 easy_ffi = "0.1.0"
 
 [[example]]
