@@ -22,17 +22,17 @@ pub fn main() {
     let pos = Position{x: 1, y: 2};
     let components: *const c_void = &pos as *const _ as *const c_void;
     // let components: &Position = unsafe { &mut *(data as *mut State) };
-
+    let layout = EntityLayout::new();
     let component_data = ComponentData {
         // number_component_types: 1,
         component_types: vec![1].as_ptr() as *const u32,
         // component_data_sizes: vec![2].as_ptr(),
         number_components: 1,
         components: components,
-        layout: EntityLayout::new(),
+        layout: layout,
     };
     let mut entities: Vec<Entity> = Vec::new();
-    for e in world.extend(vec![(component_data,)]){
+    for e in world.extend_script(component_data){
         entities.push(*e);
     }
 

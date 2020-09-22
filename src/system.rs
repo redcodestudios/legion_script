@@ -3,7 +3,7 @@ use legion::world::SubWorld;
 use crate::driver::run_script;
 
 use legion::{
-    storage::{Component,ComponentTypeId, ComponentSource, ArchetypeSource, ArchetypeWriter, EntityLayout},
+    storage::{Component,ComponentTypeId, PackedStorage,ComponentSource,UnknownComponentStorage, ArchetypeSource, ArchetypeWriter, EntityLayout},
     query::{LayoutFilter, FilterResult},
 };
 
@@ -37,11 +37,33 @@ impl ArchetypeSource for ComponentData {
     type Filter = ComponentDataFilter;
 
     fn filter(&self) -> Self::Filter {
-        Self::Filter{}
+        println!("filter - start");
+        let filter = Self::Filter{};
+        println!("filter - end");
+        filter
     }
 
     fn layout(&mut self) -> EntityLayout {
-        self.layout.clone()
+        let constructor = || Box::new(PackedStorage::<ExternalComponent>::default()) as Box<dyn UnknownComponentStorage>;
+        let mut ids: Vec<ComponentTypeId> = Vec::new();
+        unsafe{
+
+                for component_index in 0..self.number_components{
+                    let id = ComponentTypeId {
+                    type_id: TypeId::of::<ExternalComponent>(),
+                    ext_type_id: Some(*(self.component_types.offset(component_index as isize))),
+                    name: "external component"
+                };
+                ids.push(id);
+                
+                self.layout.register_component_raw(id,constructor);
+                
+            }
+        }    
+        println!("layout - start");
+        let layout = self.layout.clone();
+        println!("layout - end");
+        layout
     }
 
 }
@@ -52,23 +74,48 @@ unsafe impl Sync for ComponentData {}
 
 impl LayoutFilter for ComponentDataFilter {
     fn matches_layout(&self, components: &[ComponentTypeId]) -> FilterResult {
-        FilterResult::Match(components.is_empty())
+        println!("matches_layout - start");
+        let result = FilterResult::Match(components.is_empty());
+        println!("matches_layout - end");
+        result
     }
 }
 
 struct ComponentDataLayout;
-
 struct ExternalComponent;
 
 impl storage::ComponentSource for ComponentData {
     
     fn push_components<'b>(&mut self, writer: &mut ArchetypeWriter<'b>, entities: impl Iterator<Item = Entity>) {
+        println!("storage - push components _ start");
+        let mut ids: Vec<ComponentTypeId> = Vec::new();
+        
+        unsafe{ 
+            for component_index in 0..self.number_components{
+                let id = ComponentTypeId {
+                    type_id: TypeId::of::<ExternalComponent>(),
+                    ext_type_id: Some(*(self.component_types.offset(component_index as isize))),
+                    name: "external component"
+                };
+                ids.push(id);
+                
+                // self.layout.register_component_raw(id,constructor);
+                
+            }
+        }
+        
+        for id in ids{
+            println!("Layout tem o componente [{}]? {}", id, self.layout.has_component_by_id(id));
+        }
         for e in entities {
             writer.push(e);
+            println!("Creating entity - {:?}", e);
+            break;
         }
-
-
+        
+        
         for component_index in 0..self.number_components{
+            println!("storing components - #{}", component_index);
             unsafe {
                 let mut storage = writer.claim_components_unknown(
                     ComponentTypeId {
@@ -77,23 +124,25 @@ impl storage::ComponentSource for ComponentData {
                         name: "external component"
                     }
                 );
-            
                 storage.extend_memcopy_raw((self.components).offset(component_index as isize) as *mut u8, 1)
             }
         }
+        println!("storage - push components _ end");
     }
 }
 #[system]
 pub fn scripting(#[resource] scripts: &mut Scripts, #[resource] component_id: &mut ComponentId) {
+    println!("scripting - start");
     run_script(scripts[0].clone(), component_id);
     run_script(scripts[1].clone(), component_id);
-    println!("Resource after running {}", *component_id);
+    println!("scripting - end - Resource after running {}", *component_id);
 }
 
 #[system(for_each)]
 pub fn test_query(data: &ComponentData) {
     println!("aaaaaaaaaaa");
     println!("aaaaaaa {:?}", data);
+    println!("aaaaaaa");
    
     unsafe {
     
