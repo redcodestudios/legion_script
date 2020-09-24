@@ -1,10 +1,9 @@
 use legion::*;
-use legion::world::SubWorld;
 use crate::driver::run_script;
-
+use crate::filter::ExternalLayoutFilter;
 use legion::{
-    storage::{Component,ComponentTypeId, PackedStorage,ComponentSource,UnknownComponentStorage, ArchetypeSource, ArchetypeWriter, EntityLayout},
-    query::{LayoutFilter, FilterResult},
+    storage::{ComponentTypeId, PackedStorage,UnknownComponentStorage, ArchetypeSource, ArchetypeWriter, EntityLayout},
+    
 };
 
 use std::any::TypeId;
@@ -20,7 +19,6 @@ pub struct Position {
     pub y: u32
 }
 
-pub struct ComponentDataFilter;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -34,7 +32,7 @@ pub struct ComponentData {
 }
 
 impl ArchetypeSource for ComponentData {
-    type Filter = ComponentDataFilter;
+    type Filter = ExternalLayoutFilter;
 
     fn filter(&self) -> Self::Filter {
         println!("filter - start");
@@ -72,14 +70,6 @@ unsafe impl Send for ComponentData {}
 unsafe impl Sync for ComponentData {}
 
 
-impl LayoutFilter for ComponentDataFilter {
-    fn matches_layout(&self, components: &[ComponentTypeId]) -> FilterResult {
-        println!("matches_layout - start");
-        let result = FilterResult::Match(components.is_empty());
-        println!("matches_layout - end");
-        result
-    }
-}
 
 struct ComponentDataLayout;
 struct ExternalComponent;
@@ -122,14 +112,14 @@ impl storage::ComponentSource for ComponentData {
         for component_index in 0..self.number_components{
             println!("storing components - #{}", component_index);
             unsafe {
-                let mut storage = writer.claim_components_unknown(
+                let mut unkown_component_writer = writer.claim_components_unknown(
                     ComponentTypeId {
                         type_id: TypeId::of::<ExternalComponent>(),
                         ext_type_id: Some(*(self.component_types.offset(component_index as isize))),
                         name: "external component"
                     }
                 );
-                storage.extend_memcopy_raw((self.components).offset(component_index as isize) as *mut u8, 1)
+                unkown_component_writer.extend_memcopy_raw((self.components).offset(component_index as isize) as *mut u8, 1)
             }
         }
         println!("storage - push components _ end");
