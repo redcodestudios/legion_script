@@ -15,7 +15,6 @@ pub type Scripts = Vec<String>;
 
 // #[derive(Debug)]
 #[repr(C)]
-#[repr(packed)]
 pub struct Position {
     pub x: u32,
     pub y: u32
@@ -29,7 +28,7 @@ pub struct ComponentData {
     pub component_types: *const u32,
     // pub component_data_sizes: *const u32,
     pub number_components: u32,
-    pub components: *const c_void,
+    pub components: *const *const c_void,
     pub layout: EntityLayout,
 }
 
@@ -44,20 +43,24 @@ impl ArchetypeSource for ComponentData {
     }
 
     fn layout(&mut self) -> EntityLayout {
-        let constructor = || Box::new(PackedStorage::<ExternalComponent>::default()) as Box<dyn UnknownComponentStorage>;
+        let constructor = || {
+            let storage = Box::new(PackedStorage::<ExternalComponent>::default()) as Box<dyn UnknownComponentStorage>;
+            println!("REGISTERING storage: {:?}", &*storage as *const _ as *const c_void);
+            return storage
+        };
         let mut ids: Vec<ComponentTypeId> = Vec::new();
         unsafe{
 
-                for component_index in 0..self.number_components{
+                for component_index in 0..self.number_components {
+                    println!("ext id: {}", *(self.component_types).offset(component_index as isize) as u32 );
                     let id = ComponentTypeId {
-                    type_id: TypeId::of::<ExternalComponent>(),
-                    ext_type_id: Some(*(self.component_types)),
-                    name: "external component"
-                };
-                ids.push(id);
+                        type_id: TypeId::of::<ExternalComponent>(),
+                        ext_type_id: Some(*(self.component_types).offset(component_index as isize) as u32),
+                        name: "external component"
+                    };
+                    ids.push(id);
                 
-                self.layout.register_component_raw(id,constructor);
-                
+                    self.layout.register_component_raw(id, constructor);
             }
         }    
         println!("layout - start");
@@ -117,11 +120,15 @@ impl storage::ComponentSource for ComponentData {
                 let mut unkown_component_writer = writer.claim_components_unknown(
                     ComponentTypeId {
                         type_id: TypeId::of::<ExternalComponent>(),
-                        ext_type_id: Some(*(self.component_types.offset(component_index as isize))),
+                        ext_type_id: Some(*(self.component_types.offset(component_index as isize)) as u32),
                         name: "external component"
                     }
                 );
-                unkown_component_writer.extend_memcopy_raw(self.components as *mut u8, 1)
+                println!("unknown_component_writer_storage: {:?}", unkown_component_writer.components as *const _ as *const c_void);
+                let comp_ptr = *self.components.offset(component_index as isize);
+                // let black_magic: *const *const c_void = &[comp_ptr] as *const *const c_void;
+                println!("pushing comp_ptr: {:?}", comp_ptr);
+                unkown_component_writer.extend_memcopy_raw(comp_ptr as *mut u8, 1);
             }
         }
         println!("storage - push components _ end");
