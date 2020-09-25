@@ -13,7 +13,9 @@ use std::fmt::Debug;
 pub type ComponentId = u64;
 pub type Scripts = Vec<String>;
 
-#[derive(Debug)]
+// #[derive(Debug)]
+#[repr(C)]
+#[repr(packed)]
 pub struct Position {
     pub x: u32,
     pub y: u32
@@ -49,7 +51,7 @@ impl ArchetypeSource for ComponentData {
                 for component_index in 0..self.number_components{
                     let id = ComponentTypeId {
                     type_id: TypeId::of::<ExternalComponent>(),
-                    ext_type_id: Some(*(self.component_types.offset(component_index as isize))),
+                    ext_type_id: Some(*(self.component_types)),
                     name: "external component"
                 };
                 ids.push(id);
@@ -72,7 +74,7 @@ unsafe impl Sync for ComponentData {}
 
 
 struct ComponentDataLayout;
-struct ExternalComponent;
+pub struct ExternalComponent;
 impl storage::IntoComponentSource for ComponentData{
     type Source = Self; 
     fn into(self)-> Self{
@@ -100,7 +102,7 @@ impl storage::ComponentSource for ComponentData {
         }
         
         for id in ids{
-            println!("Layout tem o componente [{}]? {}", id, self.layout.has_component_by_id(id));
+            println!("Layout has the component id [{:?}], name [{}]? {}", id.ext_type_id, id.name, self.layout.has_component_by_id(id));
         }
         for e in entities {
             writer.push(e);
@@ -119,7 +121,7 @@ impl storage::ComponentSource for ComponentData {
                         name: "external component"
                     }
                 );
-                unkown_component_writer.extend_memcopy_raw((self.components).offset(component_index as isize) as *mut u8, 1)
+                unkown_component_writer.extend_memcopy_raw(self.components as *mut u8, 1)
             }
         }
         println!("storage - push components _ end");
@@ -146,7 +148,7 @@ pub fn test_query(data: &ComponentData) {
         let data: &Position =  & *(data.components as *const Position);
 
          // let pos = std::mem::transmute::<*const c_void, Position>((data.components));
-         println!("Pos x: {:?}", data);
+         println!("Pos x: {:?}", data.x);
     }
 
 
