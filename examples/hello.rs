@@ -9,12 +9,21 @@ use legion_script::system::{scripting_system, test_query_system, Scripts, Compon
 use std::os::raw::c_void;
 use std::any::TypeId;
 use std::slice;
+use simple_logger::{SimpleLogger};
+use log::*;
 
 struct Rotation {
     x: u32
 }
 
+pub fn init_logger(level: LevelFilter) -> Result<(), SetLoggerError> {
+    log::set_boxed_logger(Box::new(SimpleLogger::new()))
+        .map(|()| log::set_max_level(level))
+}
+
 pub fn main() {
+    init_logger(LevelFilter::Trace).expect("Failed to create logger");
+
     // let c = ComponentTypeId{type_id: TypeId::of::<ExternalComponent>(), ext_type_id: Some(22), name: "meu_type" };
 
     let mut world = World::default();
@@ -28,8 +37,8 @@ pub fn main() {
     let pos_ptr = &pos as *const _ as *const c_void;
     let rot_ptr = &rot as *const _ as *const c_void;
 
-    println!("pos ptr: {:?}", pos_ptr);
-    println!("rot ptr: {:?}", rot_ptr);
+    trace!("pos ptr: {:?}", pos_ptr);
+    trace!("rot ptr: {:?}", rot_ptr);
     
     let comp_array = [pos_ptr, rot_ptr];
     println!("comp array: {:?}", &comp_array as *const _);

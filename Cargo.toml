@@ -11,6 +11,8 @@ cc = "1.0.59"
 [dependencies]
 legion = {path = "./legion"}
 easy_ffi = "0.1.0"
+log = "0.4.11"
+simple_logger = "1.9.0"
 
 [[example]]
 name = "hello"

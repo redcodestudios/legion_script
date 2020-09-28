@@ -76,7 +76,6 @@ unsafe impl Sync for ComponentData {}
 
 
 
-struct ComponentDataLayout;
 pub struct ExternalComponent;
 impl storage::IntoComponentSource for ComponentData{
     type Source = Self; 
