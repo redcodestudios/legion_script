@@ -7,6 +7,7 @@ use legion::{
 use legion_script::{
     system::{scripting_system, test_query_system, Scripts, ComponentId, ComponentData, ExternalComponent},
     driver::{convert_bytes_into_pointer},
+    utils::{create_test_component_data},
     components::{Position, Rotation}
 };
 
@@ -29,40 +30,10 @@ pub fn main() {
 
     let mut world = World::default();
     let mut resources = Resources::default();
-
-    let component_types = [666, 777].as_ptr() as *const u32;
-    
-    let pos = Position{x: 100, y: 50};
-    let rot = Rotation{x: 50};
-
-    let pos_ptr = &pos as *const _ as *const c_void;
-    let rot_ptr = &rot as *const _ as *const c_void;
-
-    trace!("pos ptr: {:?}", pos_ptr);
-    trace!("rot ptr: {:?}", rot_ptr);
-    
-    let comp_array = [pos_ptr, rot_ptr];
-    println!("comp array: {:?}", &comp_array as *const _);
-    let components: *const *const c_void = &comp_array as *const  *const _ as *const *const c_void;
-    println!("components: {:?}", components);
-    
-    unsafe {
-    	println!("OFFSET {:?}", (*(components.offset(1) as *const _) as *const _));
-    	// let data: &Position =  & *((components.offset(0) as *const c_void) as *const Position);
-    	// println!("component ptr {}", data.x);
-    }
     // let components: &Position = unsafe { &mut *(data as *mut State) };
-    let layout = EntityLayout::new();
-    let component_data = ComponentData {
-        // number_component_types: 1,
-        component_types: component_types, 
-        // component_data_sizes: vec![2].as_ptr(),
-        number_components: 2,
-        components: components,
-        layout: layout,
-    };
+    
     let mut entities: Vec<Entity> = Vec::new();
-    for e in world.extend(component_data){
+    for e in world.extend(create_test_component_data()){
         entities.push(*e);
     }
 
