@@ -13,7 +13,7 @@ use std::fmt::Debug;
 pub type ComponentId = u64;
 pub type Scripts = Vec<String>;
 
-// #[derive(Debug)]
+#[derive(Debug)]
 #[repr(C)]
 pub struct Position {
     pub x: u32,
@@ -77,7 +77,14 @@ unsafe impl Sync for ComponentData {}
 
 
 struct ComponentDataLayout;
-pub struct ExternalComponent;
+
+pub struct ExternalComponent {
+   _private: *const c_void,
+}
+
+unsafe impl Send for ExternalComponent{}
+unsafe impl Sync for ExternalComponent {}
+
 impl storage::IntoComponentSource for ComponentData{
     type Source = Self; 
     fn into(self)-> Self{
@@ -126,9 +133,9 @@ impl storage::ComponentSource for ComponentData {
                 );
                 println!("unknown_component_writer_storage: {:?}", unkown_component_writer.components as *const _ as *const c_void);
                 let comp_ptr = *self.components.offset(component_index as isize);
-                // let black_magic: *const *const c_void = &[comp_ptr] as *const *const c_void;
-                println!("pushing comp_ptr: {:?}", comp_ptr);
-                unkown_component_writer.extend_memcopy_raw(comp_ptr as *mut u8, 1);
+                let black_magic: *const *const c_void = &[comp_ptr] as *const *const c_void;
+                println!("pushing black_magic_ptr: {:?}", black_magic);
+                unkown_component_writer.extend_memcopy_raw(black_magic as *mut u8, 1);
             }
         }
         println!("storage - push components _ end");
