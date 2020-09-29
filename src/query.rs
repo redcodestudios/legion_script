@@ -1,64 +1,30 @@
-// use legion::{
-//     query::{View, DefaultFilter, QueryResult, IntoIndexableIter, Fetch},
-//     storage::{ComponentTypeId, Components, Component, Archetype},
-//     world::{ComponentAccess, Permissions}
-// };
-// use crate::filter::{ExternalEntityFilter};
 
-// struct ExternalView {
-//     components: Vec<ComponentTypeId>,
-// }
+use legion::{
+    storage::{ComponentTypeId, Archetype},
+    world::World,
+};
+use crate::{
+    system::{ExternalComponent},
+    driver::{convert_bytes_into_pointer}
+};
+use std::os::raw::c_void;
+use std::slice;
 
-// impl ExternalView {}
+pub fn get_component_from_storage(world: &World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void{
+    if !archetype.layout().has_component_by_id(*id) {
+        panic!("Archetype's layout doesn't contain the required component id");
+    }
+    println!("{:?}", archetype.entities()); 
+    let storage = world.components().get(*id).unwrap();
+    println!("storage: {:?}", storage as *const _ as *const c_void);
+    let (slice_ptr, len) = storage.get_raw(archetype.index()).expect("Failed to get raw component");
+    let component: *const c_void;
+    unsafe {
+        let size = std::mem::size_of::<ExternalComponent>();
+        let slice = slice::from_raw_parts(slice_ptr as *const _, size);
+        component = convert_bytes_into_pointer(slice);
+        println!("transmutei {:?}", component);
+    }
 
-// impl DefaultFilter for ExternalView{
-//     type Filter = ExternalEntityFilter;
-// }
-
-// impl Fetch for ExternalView {
-
-// }
-
-// impl Iter for ExternalView {
-
-// }
-
-// impl <'data>View<'data> for ExternalView {
-//     type Element = <Self::Fetch as IntoIndexableIter>::Item;
-//     // type Fetch: Fetch + IntoIndexableIter<Item = Self::Element> + 'data;
-//     // type Iter: Iterator<Item = Option<Self::Fetch>> + 'data;
-//     type Read = [ComponentTypeId; 0];
-//     type Write = [ComponentTypeId; 0];
-
-//     unsafe fn fetch(
-//         components: &'data Components,
-//         archetypes: &'data [Archetype],
-//         query: QueryResult<'data>
-//     ) -> Self::Iter {}
-    
-//     fn validate(){}
-    
-//     fn validate_access(access: &ComponentAccess<'_>) -> bool {
-//         true
-//     }
-
-//     fn reads_types() -> Self::Read {
-//         []
-//     }
-    
-//     fn writes_types() -> Self::Write {
-//         [] 
-//     }    
-    
-//     fn reads<T: Component>() -> bool {
-//         true
-//     }
-    
-//     fn writes<T: Component>() -> bool {
-//         true
-//     }
-    
-//     fn requires_permissions() -> Permissions<ComponentTypeId> {
-//         Permissions::default() 
-//     }
-// }
+    component
+}

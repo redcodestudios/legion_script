@@ -1,16 +1,16 @@
 use legion_script::*;
 use legion::*;
-use legion::{storage::{ComponentTypeId, EntityLayout}};
+use legion::world::World;
+
 use legion_script::{
-    system::{ComponentId, Scripts, scripting_system,ComponentData, ExternalComponent},
-    driver::{convert_bytes_into_pointer, get_external_components_ids},
+    system::{ComponentId, Scripts, scripting_system},
+    driver::{get_external_components_ids},
     components::{Rotation, Position},
-    utils::{create_test_component_data}
+    utils::{create_test_component_data},
+    query::{get_component_from_storage}
 };
 
 use std::os::raw::c_void;
-use std::any::TypeId;
-use std::slice;
 
 #[test]
 fn insert_entities_into_world(){
@@ -36,8 +36,6 @@ fn run_python_script() {
 
 #[test]
 fn raw_component(){
-    // SimpleLogger::new().with_level(LevelFilter::Trace).init().expect("Failed to create logger");
-    
     let mut world = World::default();
     let mut resources = Resources::default();
 
@@ -48,44 +46,29 @@ fn raw_component(){
     let component_type_ids = get_external_components_ids();
     for archetype in world.archetypes() {
         println!("Archetype: {:?}", archetype);
+        assert_eq!(world.archetypes().len(), 1);
         for id in component_type_ids.iter(){
+            let component: *const c_void = get_component_from_storage(&world, archetype, id); 
             println!("Getting id {:?}", id);
-            if archetype.layout().has_component_by_id(*id) {
-                println!("{:?}", archetype.entities()); 
-                let storage = world.components().get(*id).unwrap();
-                println!("storage: {:?}", storage as *const _ as *const c_void);
-                let (slice_ptr, len) = storage.get_raw(archetype.index()).expect("Failed to get raw component");
-                    unsafe {
-                            
-                            let size = std::mem::size_of::<ExternalComponent>();
-                            let slice = slice::from_raw_parts(slice_ptr as *const _, size);
-                            // println!("{:#x}", slice);
-                            let size = size as isize;
-                            for i in 1..=size {
-                                print!("{:x}", *slice_ptr.offset(size-i)); 
-                            }
-                            println!("");
-                            let test: *const c_void = convert_bytes_into_pointer(slice);
-                            println!("transmutei {:?}", test);
-
-                            if *id == component_type_ids[0] {
-                                let comp = std::mem::transmute::<*const c_void, &Position>(test);
-                                println!("CARALHO POSITION {:?}", comp);
-                                assert_eq!(100, comp.x);
-                                assert_eq!(50, comp.y);
-                            } else if *id == component_type_ids[1] {
-                                let comp = std::mem::transmute::<*const c_void, &Rotation>(test);
-                                println!("CARALHO ROTATION {:?}", comp);
-                                assert_eq!(50, comp.x);
-                                // assert_eq!(true,false); // sanity test
-                            }
-                            println!("len: {}", len);
-                    }
-        
+            
+            if *id == component_type_ids[0] {
+                unsafe{
+                    let position = std::mem::transmute::<*const c_void, &Position>(component);
+                    println!("CARALHO POSITION {:?}", position);
+                    assert_eq!(100, position.x);
+                    assert_eq!(50, position.y);
+                }
+            } else if *id == component_type_ids[1] {
+                unsafe{
+                    let rotation = std::mem::transmute::<*const c_void, &Rotation>(component);
+                    println!("CARALHO ROTATION {:?}", rotation);
+                    assert_eq!(50, rotation.x);
+                    // assert_eq!(true,false); // sanity test
+                }
             }
-
         }
     }
+    
     
 
     let id_count = 0;

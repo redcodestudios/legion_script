@@ -8,7 +8,8 @@ use legion_script::{
     system::{scripting_system, test_query_system, Scripts, ComponentId, ComponentData, ExternalComponent},
     driver::{convert_bytes_into_pointer, get_external_components_ids},
     utils::{create_test_component_data},
-    components::{Position, Rotation}
+    components::{Position, Rotation},
+    query::{get_component_from_storage}
 };
 
 use std::os::raw::c_void;
@@ -40,50 +41,24 @@ pub fn main() {
     for archetype in world.archetypes() {
         println!("Archetype: {:?}", archetype);
         for id in component_type_ids.iter() {
+            let component: *const c_void = get_component_from_storage(&world, archetype, id); 
             println!("Getting id {:?}", id);
-            if archetype.layout().has_component_by_id(*id) {
-                println!("{:?}", archetype.entities()); 
-                let storage = world.components().get(*id).unwrap();
-                println!("storage: {:?}", storage as *const _ as *const c_void);
-                let (slice_ptr, len) = storage.get_raw(archetype.index()).expect("Failed to get raw component");
-                    unsafe {
-                            
-                            let size = std::mem::size_of::<ExternalComponent>();
-                            let slice = slice::from_raw_parts(slice_ptr as *const _, size);
-                            // println!("{:#x}", slice);
-                            let size = size as isize;
-                            for i in 1..=size {
-                                print!("{:x}", *slice_ptr.offset(size-i)); 
-                            }
-                            println!("");
-                            let test: *const c_void = convert_bytes_into_pointer(slice);
-                            println!("transmutei {:?}", test);
-
-                            if *id == component_type_ids[0] {
-                                let comp = std::mem::transmute::<*const c_void, &Position>(test);
-                                println!("CARALHO POSITION {:?}", comp);
-                                
-                            } else if *id == component_type_ids[1] {
-                                let comp = std::mem::transmute::<*const c_void, &Rotation>(test);
-                                println!("CARALHO ROTATION {:?}", comp);
-                            }
-                            // println!("t: {:?}", test);
-                            // println!("ptr: {:#x}", *slice_ptr.offset(0));
-                            // let slice = slice::from_raw_parts(slice_ptr as *const _, len);
-                            // for comp_ptr in slice {
-                            //     println!("Comp {:?}", comp_ptr);
-                            // }
-                            println!("len: {}", len);
-                            // let comp_ptr = slice_ptr.offset(len * ) as *const usize;
-                            // println!("ptr: {:?}", comp_ptr);
-                            // println!("slice is: {:?}", slice[0]);
-                            // let pos: &Position =  & *(comp_ptr as *const Position);
-                            // let pos: Position = std::mem::transmute::<*const u8, Position>(comp_ptr);
-                            // println!(" ------- pos-x: {}, pos-y: {} -------", pos.x, pos.y);
-                    }
-        
+            
+            if *id == component_type_ids[0] {
+                unsafe{
+                    let position = std::mem::transmute::<*const c_void, &Position>(component);
+                    println!("CARALHO POSITION {:?}", position);
+                    assert_eq!(100, position.x);
+                    assert_eq!(50, position.y);
+                }
+            } else if *id == component_type_ids[1] {
+                unsafe{
+                    let rotation = std::mem::transmute::<*const c_void, &Rotation>(component);
+                    println!("CARALHO ROTATION {:?}", rotation);
+                    assert_eq!(50, rotation.x);
+                    // assert_eq!(true,false); // sanity test
+                }
             }
-
         }
     }
 
