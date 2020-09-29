@@ -1,8 +1,11 @@
 use legion_script::*;
 use legion::*;
 use legion::{storage::{ComponentTypeId, EntityLayout}};
-use legion_script::system::{ComponentId, Scripts, scripting_system,ComponentData, ExternalComponent};
-use legion_script::driver::convert_bytes_into_pointer;
+use legion_script::{
+    system::{ComponentId, Scripts, scripting_system,ComponentData, ExternalComponent},
+    driver::convert_bytes_into_pointer,
+    components::{Rotation, Position},
+};
 
 use std::os::raw::c_void;
 use std::any::TypeId;
@@ -17,16 +20,6 @@ fn run_python_script() {
     assert_eq!(0,0);
 }
 
-#[derive(Debug)]
-struct Rotation {
-    x: u32
-}
-#[derive(Debug)]
-#[repr(C)]
-pub struct Position {
-    pub x: u32,
-    pub y: u32
-}
 
 #[test]
 fn raw_component(){
@@ -104,7 +97,7 @@ fn raw_component(){
                                 let comp = std::mem::transmute::<*const c_void, &Rotation>(test);
                                 println!("CARALHO ROTATION {:?}", comp);
                                 assert_eq!(50, comp.x);
-                                assert_eq!(true,false); // sanity test
+                                // assert_eq!(true,false); // sanity test
                             }
                             println!("len: {}", len);
                     }

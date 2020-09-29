@@ -5,8 +5,9 @@ use legion::{
     query::{LayoutFilter, FilterResult},
 };
 use legion_script::{
-    system::{scripting_system, test_query_system, Scripts, ComponentId, Position, ComponentData, ExternalComponent},
-    driver::{convert_bytes_into_pointer}
+    system::{scripting_system, test_query_system, Scripts, ComponentId, ComponentData, ExternalComponent},
+    driver::{convert_bytes_into_pointer},
+    components::{Position, Rotation}
 };
 
 use std::os::raw::c_void;
@@ -15,10 +16,6 @@ use std::slice;
 use simple_logger::{SimpleLogger};
 use log::*;
 
-#[derive(Debug)]
-struct Rotation {
-    x: u32
-}
 
 pub fn init_logger(level: LevelFilter) -> Result<(), SetLoggerError> {
     log::set_boxed_logger(Box::new(SimpleLogger::new()))
@@ -89,7 +86,7 @@ pub fn main() {
         println!("Archetype: {:?}", archetype);
         for id in &[component_type_id, component_type_id2] {
             println!("Getting id {:?}", id);
-            if(archetype.layout().has_component_by_id(*id)) {
+            if archetype.layout().has_component_by_id(*id) {
                 println!("{:?}", archetype.entities()); 
                 let storage = world.components().get(*id).unwrap();
                 println!("storage: {:?}", storage as *const _ as *const c_void);
@@ -107,11 +104,11 @@ pub fn main() {
                             let test: *const c_void = convert_bytes_into_pointer(slice);
                             println!("transmutei {:?}", test);
 
-                            if(*id == component_type_id) {
+                            if *id == component_type_id {
                                 let comp = std::mem::transmute::<*const c_void, &Position>(test);
                                 println!("CARALHO POSITION {:?}", comp);
                                 
-                            } else if (*id == component_type_id2) {
+                            } else if *id == component_type_id2 {
                                 let comp = std::mem::transmute::<*const c_void, &Rotation>(test);
                                 println!("CARALHO ROTATION {:?}", comp);
                             }
@@ -142,7 +139,6 @@ pub fn main() {
     //         name: "external component"
     //     }
     // );
-
 
 
     let id_count = 0;

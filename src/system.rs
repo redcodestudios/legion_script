@@ -1,6 +1,9 @@
 use legion::*;
-use crate::driver::run_script;
-use crate::filter::ExternalLayoutFilter;
+use crate::{
+    driver::run_script,
+    filter::ExternalLayoutFilter,
+    components::{Position}
+};
 use legion::{
     storage::{ComponentTypeId, PackedStorage,UnknownComponentStorage, ArchetypeSource, ArchetypeWriter, EntityLayout},
     
@@ -12,13 +15,6 @@ use std::fmt::Debug;
 
 pub type ComponentId = u64;
 pub type Scripts = Vec<String>;
-
-#[derive(Debug)]
-#[repr(C)]
-pub struct Position {
-    pub x: u32,
-    pub y: u32
-}
 
 
 #[repr(C)]
