@@ -12,6 +12,18 @@ use std::os::raw::c_void;
 use std::any::TypeId;
 use std::slice;
 
+#[test]
+fn insert_entities_into_world(){
+    let mut world = World::default();
+    let mut entities: Vec<Entity> = Vec::new();
+    for e in world.extend(create_test_component_data()){
+        entities.push(*e);
+    }
+
+    for e in entities.iter() {
+        assert_eq!(true, world.contains(*e));
+    }
+}
 
 // #[test]
 fn run_python_script() {

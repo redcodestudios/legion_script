@@ -30,16 +30,10 @@ pub fn main() {
 
     let mut world = World::default();
     let mut resources = Resources::default();
-    // let components: &Position = unsafe { &mut *(data as *mut State) };
     
-    let mut entities: Vec<Entity> = Vec::new();
-    for e in world.extend(create_test_component_data()){
-        entities.push(*e);
-    }
-
-    for e in entities.iter() {
-        assert_eq!(true, world.contains(*e));
-    }
+    let component_data = create_test_component_data();
+    let entities = world.extend(component_data); 
+    
     
     let component_type_id = ComponentTypeId { 
             type_id: TypeId::of::<ExternalComponent>(),

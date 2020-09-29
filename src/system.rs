@@ -5,7 +5,7 @@ use crate::{
     components::{Position}
 };
 use legion::{
-    storage::{ComponentTypeId, PackedStorage,UnknownComponentStorage, ArchetypeSource, ArchetypeWriter, EntityLayout},
+    storage::{ComponentTypeId, PackedStorage, UnknownComponentStorage, ArchetypeSource, ArchetypeWriter, EntityLayout},
     
 };
 
