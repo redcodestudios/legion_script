@@ -10,7 +10,7 @@ use crate::{
 use std::os::raw::c_void;
 use std::slice;
 
-pub fn get_component_from_storage(world: &World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void{
+fn get_component_from_storage(world: &World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void{
     if !archetype.layout().has_component_by_id(*id) {
         panic!("Archetype's layout doesn't contain the required component id");
     }
@@ -27,4 +27,16 @@ pub fn get_component_from_storage(world: &World, archetype: &Archetype, id: &Com
     }
 
     component
+}
+
+
+pub fn get_external_components(world: &World, component_type_ids: Vec<ComponentTypeId>,components: &mut Vec<*const c_void>){
+    for archetype in world.archetypes() {
+        println!("Archetype: {:?}", archetype);
+        for id in component_type_ids.iter() {
+            let component: *const c_void = get_component_from_storage(&world, archetype, id); 
+            println!("Getting id {:?}", id);
+            components.push(component);           
+        }
+    }
 }

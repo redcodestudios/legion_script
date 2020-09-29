@@ -7,7 +7,7 @@ use legion_script::{
     driver::{get_external_components_ids},
     components::{Rotation, Position},
     utils::{create_test_component_data},
-    query::{get_component_from_storage}
+    query::{get_external_components}
 };
 
 use std::os::raw::c_void;
@@ -44,33 +44,20 @@ fn raw_component(){
     let entities = world.extend(component_data);
 
     let component_type_ids = get_external_components_ids();
-    for archetype in world.archetypes() {
-        println!("Archetype: {:?}", archetype);
-        assert_eq!(world.archetypes().len(), 1);
-        for id in component_type_ids.iter(){
-            let component: *const c_void = get_component_from_storage(&world, archetype, id); 
-            println!("Getting id {:?}", id);
-            
-            if *id == component_type_ids[0] {
-                unsafe{
-                    let position = std::mem::transmute::<*const c_void, &Position>(component);
-                    println!("CARALHO POSITION {:?}", position);
-                    assert_eq!(100, position.x);
-                    assert_eq!(50, position.y);
-                }
-            } else if *id == component_type_ids[1] {
-                unsafe{
-                    let rotation = std::mem::transmute::<*const c_void, &Rotation>(component);
-                    println!("CARALHO ROTATION {:?}", rotation);
-                    assert_eq!(50, rotation.x);
-                    // assert_eq!(true,false); // sanity test
-                }
-            }
-        }
+    let mut components: Vec<*const c_void> = vec![];
+    
+    get_external_components(&world, component_type_ids.to_vec(), &mut components);
+    
+    unsafe{
+        let position = std::mem::transmute::<*const c_void, &Position>(components[0]);
+        assert_eq!(100, position.x);
+        assert_eq!(50, position.y);
+    }
+    unsafe{
+        let rotation = std::mem::transmute::<*const c_void, &Rotation>(components[1]);
+        assert_eq!(50, rotation.x);
     }
     
-    
-
     let id_count = 0;
     resources.insert::<ComponentId>(id_count);
     

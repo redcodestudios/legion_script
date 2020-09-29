@@ -1,20 +1,14 @@
 use legion::*;
 
-use legion::{
-    storage::{Component,ComponentTypeId, ComponentSource, ArchetypeSource, ArchetypeWriter,ArchetypeIndex, EntityLayout, PackedStorage},
-    query::{LayoutFilter, FilterResult},
-};
 use legion_script::{
-    system::{scripting_system, test_query_system, Scripts, ComponentId, ComponentData, ExternalComponent},
-    driver::{convert_bytes_into_pointer, get_external_components_ids},
+    system::{scripting_system, test_query_system, Scripts, ComponentId},
+    driver::{get_external_components_ids},
     utils::{create_test_component_data},
     components::{Position, Rotation},
-    query::{get_component_from_storage}
+    query::{get_external_components}
 };
 
 use std::os::raw::c_void;
-use std::any::TypeId;
-use std::slice;
 use simple_logger::{SimpleLogger};
 use log::*;
 
@@ -37,39 +31,19 @@ pub fn main() {
     
     
     let component_type_ids = get_external_components_ids();
-
-    for archetype in world.archetypes() {
-        println!("Archetype: {:?}", archetype);
-        for id in component_type_ids.iter() {
-            let component: *const c_void = get_component_from_storage(&world, archetype, id); 
-            println!("Getting id {:?}", id);
-            
-            if *id == component_type_ids[0] {
-                unsafe{
-                    let position = std::mem::transmute::<*const c_void, &Position>(component);
-                    println!("CARALHO POSITION {:?}", position);
-                    assert_eq!(100, position.x);
-                    assert_eq!(50, position.y);
-                }
-            } else if *id == component_type_ids[1] {
-                unsafe{
-                    let rotation = std::mem::transmute::<*const c_void, &Rotation>(component);
-                    println!("CARALHO ROTATION {:?}", rotation);
-                    assert_eq!(50, rotation.x);
-                    // assert_eq!(true,false); // sanity test
-                }
-            }
-        }
+    let mut components: Vec<*const c_void> = vec![];
+    get_external_components(&world, component_type_ids.to_vec(), &mut components);
+    
+    unsafe{
+        let position = std::mem::transmute::<*const c_void, &Position>(components[0]);
+        debug!("POSITION {:?}", position);
+    }
+    unsafe{
+        let rotation = std::mem::transmute::<*const c_void, &Rotation>(components[1]);
+        debug!("ROTATION {:?}", rotation);
     }
 
-    // let comp_storage = world.components().get(
-    //     ComponentTypeId { 
-    //         type_id: TypeId::of::<ExternalComponent>(),
-    //         ext_type_id: Some(666),
-    //         name: "external component"
-    //     }
-    // );
-
+    
 
     let id_count = 0;
     resources.insert::<ComponentId>(id_count);
