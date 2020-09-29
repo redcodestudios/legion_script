@@ -12,6 +12,7 @@ use std::slice;
 use simple_logger::{SimpleLogger};
 use log::*;
 
+#[derive(Debug)]
 struct Rotation {
     x: u32
 }
@@ -91,13 +92,35 @@ pub fn main() {
                 println!("storage: {:?}", storage as *const _ as *const c_void);
                 let (slice_ptr, len) = storage.get_raw(archetype.index()).expect("Failed to get raw component");
                     unsafe {
-                            // let test = std::mem::transmute::<*const u8, *const c_void>(slice_ptr); 
+                            
+                            let size = std::mem::size_of::<ExternalComponent>();
+                            let slice = slice::from_raw_parts(slice_ptr as *const _, size);
+                            // println!("{:#x}", slice);
+                            let size = size as isize;
+                            for i in 1..=size {
+                                print!("{:x}", *slice_ptr.offset(size-i)); 
+                            }
+                            println!("");
+                            let test: *const c_void = std::mem::transmute::<[u8; 8], *const _>([slice[0], slice[1], slice[2], slice[3], slice[4], slice[5], slice[6], slice[7]]);
+                            println!("transmutei {:?}", test);
+
+                            if(*id == component_type_id) {
+                                let comp = std::mem::transmute::<*const c_void, &Position>(test);
+                                println!("CARALHO POSITION {:?}", comp);
+                                
+                            } else if (*id == component_type_id2) {
+                                let comp = std::mem::transmute::<*const c_void, &Rotation>(test);
+                                println!("CARALHO ROTATION {:?}", comp);
+                            }
                             // println!("t: {:?}", test);
-                            println!("ptr: {:?}", slice_ptr);
+                            // println!("ptr: {:#x}", *slice_ptr.offset(0));
+                            // let slice = slice::from_raw_parts(slice_ptr as *const _, len);
+                            // for comp_ptr in slice {
+                            //     println!("Comp {:?}", comp_ptr);
+                            // }
                             println!("len: {}", len);
                             // let comp_ptr = slice_ptr.offset(len * ) as *const usize;
                             // println!("ptr: {:?}", comp_ptr);
-                            // let slice = slice::from_raw_parts(comp_ptr as *const _, len);
                             // println!("slice is: {:?}", slice[0]);
                             // let pos: &Position =  & *(comp_ptr as *const Position);
                             // let pos: Position = std::mem::transmute::<*const u8, Position>(comp_ptr);
