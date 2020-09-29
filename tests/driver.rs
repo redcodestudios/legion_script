@@ -3,7 +3,7 @@ use legion::*;
 use legion::{storage::{ComponentTypeId, EntityLayout}};
 use legion_script::{
     system::{ComponentId, Scripts, scripting_system,ComponentData, ExternalComponent},
-    driver::convert_bytes_into_pointer,
+    driver::{convert_bytes_into_pointer, get_external_components_ids},
     components::{Rotation, Position},
     utils::{create_test_component_data}
 };
@@ -42,31 +42,13 @@ fn raw_component(){
     let mut resources = Resources::default();
 
     
-    let mut entities: Vec<Entity> = Vec::new();
     let component_data = create_test_component_data();
-    for e in world.extend(component_data){
-        entities.push(*e);
-    }
+    let entities = world.extend(component_data);
 
-    for e in entities.iter() {
-        assert_eq!(true, world.contains(*e));
-    }
-    
-    let component_type_id = ComponentTypeId { 
-            type_id: TypeId::of::<ExternalComponent>(),
-            ext_type_id: Some(666),
-            name: "external component"
-    }
-    ;
-    let component_type_id2 = ComponentTypeId { 
-            type_id: TypeId::of::<ExternalComponent>(),
-            ext_type_id: Some(777),
-            name: "external component"
-    };
-
+    let component_type_ids = get_external_components_ids();
     for archetype in world.archetypes() {
         println!("Archetype: {:?}", archetype);
-        for id in &[component_type_id, component_type_id2] {
+        for id in component_type_ids.iter(){
             println!("Getting id {:?}", id);
             if archetype.layout().has_component_by_id(*id) {
                 println!("{:?}", archetype.entities()); 
@@ -86,12 +68,12 @@ fn raw_component(){
                             let test: *const c_void = convert_bytes_into_pointer(slice);
                             println!("transmutei {:?}", test);
 
-                            if *id == component_type_id {
+                            if *id == component_type_ids[0] {
                                 let comp = std::mem::transmute::<*const c_void, &Position>(test);
                                 println!("CARALHO POSITION {:?}", comp);
                                 assert_eq!(100, comp.x);
                                 assert_eq!(50, comp.y);
-                            } else if *id == component_type_id2 {
+                            } else if *id == component_type_ids[1] {
                                 let comp = std::mem::transmute::<*const c_void, &Rotation>(test);
                                 println!("CARALHO ROTATION {:?}", comp);
                                 assert_eq!(50, comp.x);
