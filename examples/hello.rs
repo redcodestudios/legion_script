@@ -4,7 +4,10 @@ use legion::{
     storage::{Component,ComponentTypeId, ComponentSource, ArchetypeSource, ArchetypeWriter,ArchetypeIndex, EntityLayout, PackedStorage},
     query::{LayoutFilter, FilterResult},
 };
-use legion_script::system::{scripting_system, test_query_system, Scripts, ComponentId, Position, ComponentData, ExternalComponent};
+use legion_script::{
+    system::{scripting_system, test_query_system, Scripts, ComponentId, Position, ComponentData, ExternalComponent},
+    driver::{convert_bytes_into_pointer}
+};
 
 use std::os::raw::c_void;
 use std::any::TypeId;
@@ -101,7 +104,7 @@ pub fn main() {
                                 print!("{:x}", *slice_ptr.offset(size-i)); 
                             }
                             println!("");
-                            let test: *const c_void = std::mem::transmute::<[u8; 8], *const _>([slice[0], slice[1], slice[2], slice[3], slice[4], slice[5], slice[6], slice[7]]);
+                            let test: *const c_void = convert_bytes_into_pointer(slice);
                             println!("transmutei {:?}", test);
 
                             if(*id == component_type_id) {

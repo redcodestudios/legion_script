@@ -1,5 +1,5 @@
 use std::ffi::CString;
-use std::os::raw::{c_char, c_ulong};
+use std::os::raw::{c_char, c_ulong, c_void};
 
 extern {
     fn C_run_python_file(source: *const c_char);
@@ -14,4 +14,11 @@ pub fn run_script(path: String, component_id: &mut u64) -> Result<(), &'static s
    }
 
    Ok(())
+}
+
+
+pub fn convert_bytes_into_pointer(slice: &[u8]) -> *const c_void{
+    unsafe{
+        std::mem::transmute::<[u8; 8], *const _>([slice[0], slice[1], slice[2], slice[3], slice[4], slice[5], slice[6], slice[7]])
+    }
 }
