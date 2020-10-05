@@ -1,6 +1,6 @@
 use crate::{
     components::{Position, Rotation},
-    system::{ComponentData}
+    component::{ComponentData}
 };
 
 use std::os::raw::c_void;

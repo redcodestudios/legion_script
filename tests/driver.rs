@@ -3,8 +3,9 @@ use legion::*;
 use legion::world::World;
 
 use legion_script::{
-    system::{ComponentId, Scripts, scripting_system},
-    driver::{get_external_components_ids},
+    system::{Scripts, scripting_system},
+    system::ComponentId,
+    query::{get_external_components_ids},
     components::{Rotation, Position},
     utils::{create_test_component_data},
     query::{get_external_components}

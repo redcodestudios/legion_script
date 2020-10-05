@@ -1,16 +1,20 @@
+extern crate easy_ffi;
 
 use legion::{
     storage::{ComponentTypeId, Archetype},
-    world::World,
 };
+
 use crate::{
-    system::{ExternalComponent},
-    driver::{convert_bytes_into_pointer}
+    component::{ExternalComponent},
+    driver::{convert_bytes_into_pointer},
+    component::{ComponentData}
 };
 use std::os::raw::c_void;
 use std::slice;
 
-fn get_component_from_storage(world: &World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void{
+use std::any::TypeId;
+
+fn get_component_from_storage(world: &legion::world::World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void{
     if !archetype.layout().has_component_by_id(*id) {
         panic!("Archetype's layout doesn't contain the required component id");
     }
@@ -29,8 +33,7 @@ fn get_component_from_storage(world: &World, archetype: &Archetype, id: &Compone
     component
 }
 
-
-pub fn get_external_components(world: &World, component_type_ids: Vec<ComponentTypeId>,components: &mut Vec<*const c_void>){
+pub fn get_external_components(world: &legion::world::World, component_type_ids: Vec<ComponentTypeId>,components: &mut Vec<*const c_void>){
     for archetype in world.archetypes() {
         println!("Archetype: {:?}", archetype);
         for id in component_type_ids.iter() {
@@ -39,4 +42,16 @@ pub fn get_external_components(world: &World, component_type_ids: Vec<ComponentT
             components.push(component);           
         }
     }
+}
+
+pub fn get_external_components_ids() -> [ComponentTypeId;2]{
+    [ComponentTypeId { 
+        type_id: TypeId::of::<ExternalComponent>(),
+        ext_type_id: Some(666),
+        name: "external component"
+    }, ComponentTypeId { 
+        type_id: TypeId::of::<ExternalComponent>(),
+        ext_type_id: Some(777),
+        name: "external component"
+    }]
 }

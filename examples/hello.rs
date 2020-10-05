@@ -1,8 +1,8 @@
 use legion::*;
 
 use legion_script::{
-    system::{scripting_system, test_query_system, Scripts, ComponentId},
-    driver::{get_external_components_ids},
+    system::{scripting_system, Scripts, ComponentId},
+    query::{get_external_components_ids},
     utils::{create_test_component_data},
     components::{Position, Rotation},
     query::{get_external_components}
@@ -54,7 +54,6 @@ pub fn main() {
 
     let mut schedule = Schedule::builder()
         .add_system(scripting_system())
-        .add_system(test_query_system())
         .build();
 
     schedule.execute(&mut world, &mut resources);
