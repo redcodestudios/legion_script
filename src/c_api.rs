@@ -41,6 +41,8 @@ easy_ffi!(ptr_ffi =>
 
 #[repr(C)]
 pub struct World;
+unsafe impl Sync for World {}
+unsafe impl Send for World {}
 
 ptr_ffi!(
     fn legion_world_new() -> Result<*mut World, &'static str> {
@@ -54,11 +56,12 @@ ptr_ffi!(
     fn legion_create_entity(world_ptr: *mut World, component_data: *mut ComponentData) -> Result<*mut World, &'static str> {
         info!("Creating entity");
         unsafe {
+            debug!("Raw World Pointer from C in Rust: {:?}", world_ptr);
             let world = (world_ptr as *mut legion::World).as_mut().expect("Failed to cast *mut World to &mut legion::World");
             // let component_data_ref = component_data.as_ref().expect("Failed to get component data reference");
             // world.extend((*component_data_ref).clone());
-            world.extend(create_test_component_data());
             debug!("AiAI");
+            world.extend(create_test_component_data());
             let boxed = Box::new(world);
             Ok(Box::into_raw(boxed) as *mut World)
         }

@@ -11,12 +11,13 @@ use legion_script::{
 use std::os::raw::c_void;
 use simple_logger::{SimpleLogger};
 use log::*;
-
-
+use std::sync::Arc;
 pub fn init_logger(level: LevelFilter) -> Result<(), SetLoggerError> {
     log::set_boxed_logger(Box::new(SimpleLogger::new()))
         .map(|()| log::set_max_level(level))
 }
+
+static mut world2: Arc<*const legion::world::World> = Arc::new(std::ptr::null());
 
 pub fn main() {
     init_logger(LevelFilter::Trace).expect("Failed to create logger");
@@ -25,6 +26,7 @@ pub fn main() {
 
     let mut world = World::default();
     let mut resources = Resources::default();
+    world2 = Arc::new(&world as *const legion::world::World);
     
     // let component_data = create_test_component_data();
     // let entities = world.extend(component_data); 
@@ -40,20 +42,20 @@ pub fn main() {
     // }
 
     
-
     let id_count = 0;
     resources.insert::<ComponentId>(id_count);
     
     let scripts = vec![String::from("examples/python/hello.py")/*, String::from("examples/python/hello2.py")*/];
     resources.insert::<Scripts>(scripts);
 
-
-    let mut schedule = Schedule::builder()
-        .add_system(scripting_system(World::default()))
+    unsafe{
+        let mut schedule = Schedule::builder()
+        .add_system(scripting_system(world2.clone()))
         .build();
-
-    schedule.execute(&mut world, &mut resources);
-    std::thread::sleep(std::time::Duration::from_millis(500));
+        
+        schedule.execute(&mut world, &mut resources);
+    } 
+        std::thread::sleep(std::time::Duration::from_millis(500));
 
     let component_type_ids = get_external_components_ids();
     let mut components: Vec<*const c_void> = vec![];

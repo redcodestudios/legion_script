@@ -3,6 +3,7 @@ use std::os::raw::{c_char, c_ulong, c_void};
 use std::convert::TryInto;
 
 use crate::c_api::World;
+use log::*;
 
 extern {
     // fn C_run_python_file(source: *const c_char);
@@ -10,10 +11,12 @@ extern {
 }
 
 pub fn run_script(world: *mut legion::world::World, path: String, component_id: &mut u64) -> Result<(), &'static str> {
-   unsafe {
-       let boxed = Box::new(world);
+    unsafe {
+        let boxed = Box::new(world);
+        let raw_world = Box::into_raw(boxed) as *mut World;
+        debug!("Raw World Pointer in rust: {:?}", raw_world);
         // C_run_python_file(CString::new(path).expect("Failed to convert to CStr").as_ptr());
-       C_RUN_PYSCRIPT(Box::into_raw(boxed) as *mut World, CString::new(path).expect("Failed to convert to CStr").as_ptr(), component_id);
+        C_RUN_PYSCRIPT(raw_world, CString::new(path).expect("Failed to convert to CStr").as_ptr(), component_id);
    }
 
    Ok(())

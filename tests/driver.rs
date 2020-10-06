@@ -28,10 +28,10 @@ fn insert_entities_into_world(){
 
 // #[test]
 fn run_python_script() {
-    let mut id_count = 0_u64;
-    driver::run_script(
-        String::from("tests/scripts/print.py"), &mut id_count);
-    assert_eq!(0,0);
+    // let mut id_count = 0_u64;
+    // driver::run_script(
+        // String::from("tests/scripts/print.py"), &mut id_count);
+    // assert_eq!(0,0);
 }
 
 
@@ -67,7 +67,7 @@ fn raw_component(){
 
 
     let mut schedule = Schedule::builder()
-        .add_system(scripting_system())
+        .add_system(scripting_system(World::default()))
         .build();
 
     schedule.execute(&mut world, &mut resources);

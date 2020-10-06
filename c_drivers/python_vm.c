@@ -172,6 +172,7 @@ void C_RUN_PYSCRIPT(World* world, const char* script, unsigned long *component_i
     // SET WORLD
     //@TODO: create world singleton in C
     WORLD = world;
+    fprintf(stderr, "%p\n", WORLD);
     
     wchar_t *program = Py_DecodeLocale(script, NULL);
     if (program == NULL) {
