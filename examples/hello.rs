@@ -26,35 +26,38 @@ pub fn main() {
     let mut world = World::default();
     let mut resources = Resources::default();
     
-    let component_data = create_test_component_data();
-    let entities = world.extend(component_data); 
+    // let component_data = create_test_component_data();
+    // let entities = world.extend(component_data); 
     
     
-    let component_type_ids = get_external_components_ids();
-    let mut components: Vec<*const c_void> = vec![];
-    get_external_components(&world, component_type_ids.to_vec(), &mut components);
-    
-    unsafe{
-        let position = std::mem::transmute::<*const c_void, &Position>(components[0]);
-        debug!("POSITION {:?}", position);
-    }
-    unsafe{
-        let rotation = std::mem::transmute::<*const c_void, &Rotation>(components[1]);
-        debug!("ROTATION {:?}", rotation);
-    }
+    // unsafe{
+    //     let position = std::mem::transmute::<*const c_void, &Position>(components[0]);
+    //     debug!("POSITION {:?}", position);
+    // }
+    // unsafe{
+    //     let rotation = std::mem::transmute::<*const c_void, &Rotation>(components[1]);
+    //     debug!("ROTATION {:?}", rotation);
+    // }
 
     
 
     let id_count = 0;
     resources.insert::<ComponentId>(id_count);
     
-    let scripts = vec![String::from("examples/python/hello.py"), String::from("examples/python/hello2.py")];
+    let scripts = vec![String::from("examples/python/hello.py")/*, String::from("examples/python/hello2.py")*/];
     resources.insert::<Scripts>(scripts);
 
 
     let mut schedule = Schedule::builder()
-        .add_system(scripting_system())
+        .add_system(scripting_system(World::default()))
         .build();
 
     schedule.execute(&mut world, &mut resources);
+    std::thread::sleep(std::time::Duration::from_millis(500));
+
+    let component_type_ids = get_external_components_ids();
+    let mut components: Vec<*const c_void> = vec![];
+    get_external_components(&world, component_type_ids.to_vec(), &mut components);
+   
+    debug!("COMPONENTS {:?}", components);
 }

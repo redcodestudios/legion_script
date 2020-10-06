@@ -20,7 +20,7 @@ unsafe impl Send for ExternalComponent{}
 unsafe impl Sync for ExternalComponent{}
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ComponentData {
     pub component_types: *const u32,
     pub number_components: u32,

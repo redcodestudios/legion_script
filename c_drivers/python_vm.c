@@ -7,7 +7,18 @@
 
 #define PY_NONE Py_BuildValue("")
 
+/* typedef void(*World)(void*); */
+/* typedef void(*ComponentData)(void*, ); */
+
+typedef struct World World;
+typedef struct ComponentData ComponentData;
+
+extern void legion_create_entity(World* world, ComponentData* component_data);
+extern ComponentData* legion_create_component_data(int* component_types, int number_components, void** components);
+extern World* legion_world_new();
+
 static unsigned long *counter = NULL;
+static World *WORLD = NULL;
 
 /* static unsigned long get_counter() { */
 /*     return *counter; */
@@ -67,10 +78,15 @@ static PyObject* say_hello(PyObject *self, PyObject *args) {
 
 /** new entity **/
 static PyObject* new_entity(PyObject *self, PyObject *args) {
+    int component_types[1] = {666};
+    void* components = NULL;
+    
     Py_ssize_t args_size = PyTuple_Size(args);
     fprintf(stderr, "NUMBER DE ARGS %d\n", (int) args_size);
 
     PyObject *temp;
+
+    components = malloc(sizeof(PyObject*));
 
     // This breaks if user pass more than one argument to function
     for(Py_ssize_t i=0; i<args_size; i++) {
@@ -79,6 +95,8 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
         // TEST IF PTR IS CLEANED
         py_obj_ptr = temp;
         Py_INCREF(temp);
+
+        components = temp;
         
         /* PyObject* class = PyObject_GetAttrString(temp, "__class__"); */
         /* if(class == NULL) { */
@@ -96,6 +114,9 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
         /* PyErr_Print(); */
     }
     
+    ComponentData* comp_data = legion_create_component_data(component_types, 1, components);
+    legion_create_entity(WORLD, comp_data);
+    fprintf(stderr, "aaaa\n");
     return PY_NONE;
 }
 
@@ -143,11 +164,15 @@ PyInit_engine(void)
 }
 
 /** RUN SCRIPT **/
-void C_RUN_PYSCRIPT(const char* script, unsigned long *component_id) {
+void C_RUN_PYSCRIPT(World* world, const char* script, unsigned long *component_id) {
     
     // SET RUST ID
     counter = component_id;
-
+    
+    // SET WORLD
+    //@TODO: create world singleton in C
+    WORLD = world;
+    
     wchar_t *program = Py_DecodeLocale(script, NULL);
     if (program == NULL) {
         fprintf(stderr, "Fatal error: cannot decode arg[0]\n");
@@ -157,7 +182,7 @@ void C_RUN_PYSCRIPT(const char* script, unsigned long *component_id) {
    
     PyImport_AppendInittab("engine", &PyInit_engine);
     Py_Initialize();
-    
+
     FILE *script_f = fopen(script, "r");
     PyRun_SimpleFile(script_f, script);
 
