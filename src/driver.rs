@@ -9,11 +9,22 @@ extern {
     fn C_RUN_PYSCRIPT(world: *mut World, source: *const c_char, component_id: *mut c_ulong);
 }
 
-pub fn run_script(world: *mut legion::world::World, path: String, component_id: &mut u64) -> Result<(), &'static str> {
+pub fn run_script(world: &mut legion::world::World, path: String, component_id: &mut u64) -> Result<(), &'static str> {
    unsafe {
-       let boxed = Box::new(world);
+        // println!("run script {}", (*world).len());
+
+       // let boxed = Box::new(world);
+       // let raw_boxed = Box::into_raw(boxed) as *mut World;
+       // let mut _world = (raw_boxed as *mut legion::world::World);
+       
+       // println!("raw boxed {:p}", raw_boxed);
+       // println!("world ptr {:p}", _world);
+       
+       
+       // let _world = (raw_boxed as *mut legion::world::World).as_mut().expect("Failed to cast *mut World to &mut legion::systems::World");
+       // println!("asduasuhdsa {}, {}, {} ", _world.index.component_layouts.counts.len(), _world.index.component_layouts.data.len(), _world.index.component_layouts.indices.len());
         // C_run_python_file(CString::new(path).expect("Failed to convert to CStr").as_ptr());
-       C_RUN_PYSCRIPT(Box::into_raw(boxed) as *mut World, CString::new(path).expect("Failed to convert to CStr").as_ptr(), component_id);
+       C_RUN_PYSCRIPT(world as *mut legion::World as *mut World, CString::new(path).expect("Failed to convert to CStr").as_ptr(), component_id);
    }
 
    Ok(())

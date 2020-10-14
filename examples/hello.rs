@@ -1,11 +1,12 @@
 use legion::*;
 
 use legion_script::{
-    system::{scripting_system, Scripts, ComponentId},
+    system::{/*local_scripting_system, */Scripts, ComponentId},
     query::{get_external_components_ids},
     utils::{create_test_component_data},
     components::{Position, Rotation},
-    query::{get_external_components}
+    query::{get_external_components},
+    driver::run_script,
 };
 
 use std::os::raw::c_void;
@@ -44,12 +45,21 @@ pub fn main() {
     let id_count = 0;
     resources.insert::<ComponentId>(id_count);
     
-    let scripts = vec![String::from("examples/python/hello.py")/*, String::from("examples/python/hello2.py")*/];
-    resources.insert::<Scripts>(scripts);
+    let scripts = vec![String::from("examples/python/hello.py"), String::from("examples/python/hello2.py")];
+    // resources.insert::<Scripts>(scripts);
+
+
+    // let mut schedule = Schedule::builder()
+    //     .add_system(scripting_system(String::from("examples/python/hello.py"), &mut world))
+    //     .build();
 
 
     let mut schedule = Schedule::builder()
-        .add_system(scripting_system(World::default()))
+        .add_thread_local_fn(move |_world, _resources|{
+            debug!("World len do system {}", _world.len());
+        run_script(_world, scripts[0].clone(), &mut 1);
+        // run_script(_world, scripts[1].clone(), &mut 1);
+        })
         .build();
 
     schedule.execute(&mut world, &mut resources);

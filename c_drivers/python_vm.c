@@ -11,6 +11,7 @@
 /* typedef void(*ComponentData)(void*, ); */
 
 typedef struct World World;
+typedef struct CommandBuffer CommandBuffer;
 typedef struct ComponentData ComponentData;
 
 extern void legion_create_entity(World* world, ComponentData* component_data);

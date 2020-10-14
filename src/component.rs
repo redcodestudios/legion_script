@@ -28,13 +28,19 @@ pub struct ComponentData {
     pub layout: EntityLayout,
 }
 
+// impl legion::systems::KnownLength for ComponentData {
+//     fn len(&self) -> usize {
+//         self.number_components as usize
+//     }
+// }
+
 impl ArchetypeSource for ComponentData {
     type Filter = ExternalLayoutFilter;
 
     fn filter(&self) -> Self::Filter {
-        // println!("filter - start");
+        println!("filter - start");
         let filter = Self::Filter{};
-        // println!("filter - end");
+        println!("filter - end");
         filter
     }
 
@@ -70,7 +76,7 @@ impl ArchetypeSource for ComponentData {
 unsafe impl Send for ComponentData {}
 unsafe impl Sync for ComponentData {}
 
-impl storage::IntoComponentSource for ComponentData{
+impl storage::IntoComponentSource for ComponentData {
     type Source = Self; 
     fn into(self)-> Self{
         self

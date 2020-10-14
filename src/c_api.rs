@@ -40,7 +40,12 @@ easy_ffi!(ptr_ffi =>
 );
 
 #[repr(C)]
-pub struct World;
+pub struct World {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+pub struct CommandBuffer;
 
 ptr_ffi!(
     fn legion_world_new() -> Result<*mut World, &'static str> {
@@ -54,9 +59,10 @@ ptr_ffi!(
     fn legion_create_entity(world_ptr: *mut World, component_data: *mut ComponentData) -> Result<*mut World, &'static str> {
         info!("Creating entity");
         unsafe {
-            let world = (world_ptr as *mut legion::World).as_mut().expect("Failed to cast *mut World to &mut legion::World");
+            let world = (world_ptr as *mut legion::world::World).as_mut().expect("Failed to cast *mut World to &mut legion::systems::World");
             // let component_data_ref = component_data.as_ref().expect("Failed to get component data reference");
-            // world.extend((*component_data_ref).clone());
+            debug!("world len {}", world.len());
+            // world.extend((*component_data).clone());
             world.extend(create_test_component_data());
             debug!("AiAI");
             let boxed = Box::new(world);
