@@ -6,12 +6,13 @@ use legion::storage::ComponentTypeId;
 
 #[derive(Default)]
 pub struct ExternalLayoutFilter;
+use log::*;
 
 impl LayoutFilter for ExternalLayoutFilter {
     fn matches_layout(&self, components: &[ComponentTypeId]) -> FilterResult {
-        println!("matches_layout - start");
+        trace!("matches_layout - start");
         let result = FilterResult::Match(components.is_empty());
-        println!("matches_layout - end");
+        trace!("matches_layout - end");
         result
     }
 }
@@ -36,9 +37,9 @@ impl DynamicFilter for ExternalDynFilter{
         self.filter.prepare(world_id);
     }
     fn matches_archetype<T:Fetch>(&mut self, fetch: &T) -> FilterResult{
-        println!("matches_archetype - start");
+        trace!("matches_archetype - start");
         let result = FilterResult::Match(true);
-        println!("matches_archetype - end");
+        trace!("matches_archetype - end");
         result
     }
 }

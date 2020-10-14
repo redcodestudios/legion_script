@@ -117,7 +117,6 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
     
     ComponentData* comp_data = legion_create_component_data(component_types, 1, components);
     legion_create_entity(WORLD, comp_data);
-    fprintf(stderr, "aaaa\n");
     return PY_NONE;
 }
 

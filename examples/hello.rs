@@ -57,7 +57,7 @@ pub fn main() {
     let mut schedule = Schedule::builder()
         .add_thread_local_fn(move |_world, _resources|{
             debug!("World len do system {}", _world.len());
-        run_script(_world, scripts[0].clone(), &mut 1);
+            run_script(_world, scripts[0].clone(), &mut 1);
         // run_script(_world, scripts[1].clone(), &mut 1);
         })
         .build();
