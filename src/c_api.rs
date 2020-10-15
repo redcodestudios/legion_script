@@ -104,10 +104,3 @@ pub extern "C" fn get_component(world_ptr: *mut World, id: u32) ->*const c_void{
     }
             
 }
-
-#[no_mangle]
-pub extern "C" fn component_array(component: *const c_void) -> *const *const c_void {
-    let component_array = [component];
-    let components = &component_array as *const *const _ as *const *const c_void;
-    components
-}

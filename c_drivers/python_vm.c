@@ -5,7 +5,7 @@
 #include <structmember.h>
 #include <string.h>
 
-#include "legion.c"
+#include "legion_api.c"
 
 
 typedef struct {

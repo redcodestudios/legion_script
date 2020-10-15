@@ -53,20 +53,6 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
 
         components = temp;
         PyObject_CallMethodObjArgs(temp, PyUnicode_FromString("string"), NULL);
-        //  PyObject* class = PyObject_GetAttrString(temp, "__class__");
-        /* if(class == NULL) { */
-        /*     fprintf(stderr, "CLASS NOT FOUND\n"); */
-        /* } */
-
-        /* PyObject* id = PyObject_CallMethodObjArgs(class, PyUnicode_FromString("id"), NULL); */
-        /* if (id == NULL) { */
-        /*     fprintf(stderr, "ID NOT FOUND \n"); */
-        /* } */
-        /* Py_DECREF(temp); */
-        /* Py_DECREF(id); */
-        /* Py_DECREF(class); */
-        /* fprintf(stderr, "TYPE_ID: %ld\n", PyLong_AsLong(id)); */
-        /* PyErr_Print(); */
     }
     
     fprintf(stderr, "components pointer %p\n", temp);
