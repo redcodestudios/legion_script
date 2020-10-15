@@ -15,8 +15,12 @@ typedef struct CommandBuffer CommandBuffer;
 typedef struct ComponentData ComponentData;
 
 extern void legion_create_entity(World* world, ComponentData* component_data);
+extern void rust_print_func(ComponentData* component_data);
+extern void** component_array(void* component);
 extern ComponentData* legion_create_component_data(int* component_types, int number_components, void** components);
 extern World* legion_world_new();
+
+extern void* get_component(World* world, int id);
 
 static unsigned long *counter = NULL;
 static World *WORLD = NULL;
@@ -88,6 +92,8 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
     PyObject *temp;
 
     components = malloc(sizeof(PyObject*));
+    fprintf(stderr, "size of pyobject* %d\n", sizeof(PyObject*));
+    fprintf(stderr, "size of temp %d\n", sizeof(*temp));
 
     // This breaks if user pass more than one argument to function
     for(Py_ssize_t i=0; i<args_size; i++) {
@@ -98,8 +104,8 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
         Py_INCREF(temp);
 
         components = temp;
-        
-        /* PyObject* class = PyObject_GetAttrString(temp, "__class__"); */
+        PyObject_CallMethodObjArgs(temp, PyUnicode_FromString("string"), NULL);
+        //  PyObject* class = PyObject_GetAttrString(temp, "__class__");
         /* if(class == NULL) { */
         /*     fprintf(stderr, "CLASS NOT FOUND\n"); */
         /* } */
@@ -115,8 +121,20 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
         /* PyErr_Print(); */
     }
     
-    ComponentData* comp_data = legion_create_component_data(component_types, 1, components);
+    fprintf(stderr, "components pointer %p\n", temp);
+    
+    ComponentData* comp_data = legion_create_component_data(component_types, 1, temp);
+    rust_print_func(comp_data);
     legion_create_entity(WORLD, comp_data);
+
+
+    void** new_component = get_component(WORLD, 666);
+
+    fprintf(stderr, "components pointer voltando %p\n", new_component);
+    // fprintf(stderr, "components array pointer voltando %p\n", new_component);
+
+    fprintf(stderr, "isadsadijadsijadsji\n\n\n\n", components);
+    PyObject_CallMethodObjArgs((PyObject*) new_component, PyUnicode_FromString("string"), NULL);
     return PY_NONE;
 }
 

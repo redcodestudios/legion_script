@@ -8,6 +8,8 @@ import engine
 class Color(metaclass=engine.MetaComponent):
     def __init__(self, r, g, b):
         self.r, self.g, self.b = (r,g,b)
+    def string(self):
+        print(f"{self.r} {self.g} {self.b}")
 
 class Transform(metaclass=engine.MetaComponent):
     def __init__(self, x, y):

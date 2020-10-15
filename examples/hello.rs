@@ -65,9 +65,9 @@ pub fn main() {
     schedule.execute(&mut world, &mut resources);
     std::thread::sleep(std::time::Duration::from_millis(500));
 
-    let component_type_ids = get_external_components_ids();
-    let mut components: Vec<*const c_void> = vec![];
-    get_external_components(&world, component_type_ids.to_vec(), &mut components);
+    // let component_type_ids = get_external_components_ids();
+    // let mut components: Vec<*const c_void> = vec![];
+    // get_external_components(&world, component_type_ids.to_vec(), &mut components);
    
-    debug!("COMPONENTS {:?}", components);
+    // debug!("COMPONENTS {:?}", components);
 }

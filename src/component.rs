@@ -123,9 +123,11 @@ impl storage::ComponentSource for ComponentData {
                         name: "external component"
                     }
                 );
+                debug!("size of External component {}",std::mem::size_of::<ExternalComponent>());
                 debug!("unknown_component_writer_storage: {:?}", unkown_component_writer.components as *const _ as *const c_void);
-                let comp_ptr = *self.components.offset(component_index as isize);
-                let black_magic: *const *const c_void = &[comp_ptr] as *const *const c_void;
+                let comp_ptr = (*self).components.offset(component_index as isize);
+                debug!("component pointer before storage magic: {:?}", comp_ptr);
+                let black_magic: *const *const c_void = &[comp_ptr as *const c_void] as *const *const c_void;
                 debug!("pushing black_magic_ptr: {:?}", black_magic);
                 unkown_component_writer.extend_memcopy_raw(black_magic as *mut u8, 1);
             }
