@@ -40,32 +40,20 @@ easy_ffi!(ptr_ffi =>
 );
 
 #[repr(C)]
-pub struct World {
-    _private: [u8; 0],
-}
+pub struct World;
 
 #[repr(C)]
 pub struct CommandBuffer;
-
-ptr_ffi!(
-    fn legion_world_new() -> Result<*mut World, &'static str> {
-        info!("Creating world");
-        let world = Box::new(legion::World::default());
-        Ok(Box::into_raw(world) as *mut World)
-    }
-);
 
 ptr_ffi!(
     fn legion_create_entity(world_ptr: *mut World, component_data: *mut ComponentData) -> Result<*mut World, &'static str> {
         info!("Creating entity");
         unsafe {
             let world = (world_ptr as *mut legion::world::World).as_mut().expect("Failed to cast *mut World to &mut legion::systems::World");
-            // let component_data_ref = component_data.as_ref().expect("Failed to get component data reference");
             debug!("world len {}", world.len());
             world.extend((*component_data).clone());
             // world.extend(create_test_component_data());
-            debug!("component data pointer{:?}", (*component_data).components);
-            trace!("AiAI");
+            debug!("component data pointer {:?}", (*component_data).components);
             Ok(world as *mut legion::World as *mut World)
         }
     }
@@ -74,8 +62,11 @@ ptr_ffi!(
 ptr_ffi!(
     fn legion_create_component_data(component_types: *const u32, number_components: u32, components: *const *const c_void) -> Result<*mut ComponentData, &'static str> {
         info!("Creating component data");
-        debug!("{}", number_components);
-        debug!("{:?}", components);
+        unsafe {
+            debug!("component types {:?}", std::slice::from_raw_parts(component_types, number_components as usize));
+        }
+        debug!("number of components {}", number_components);
+        debug!("components address {:p}", components);
         let component_data = ComponentData { component_types, number_components, components, layout: legion::storage::EntityLayout::new() };
         let boxed = Box::new(component_data);
 
@@ -83,24 +74,16 @@ ptr_ffi!(
     }     
 );
 
-#[no_mangle]
-pub extern "C" fn rust_print_func(component_data: *mut ComponentData){
-   unsafe{
-       debug!("component data pointer{:?}", (*component_data).components);
-   } 
-}
-
-
-#[no_mangle]
-pub extern "C" fn get_component(world_ptr: *mut World, id: u32) ->*const c_void{
-    unsafe{
-        let world = (world_ptr as *mut legion::world::World).as_mut().expect("Failed to cast *mut World to &mut legion::systems::World");
-        let component_type_ids = crate::query::get_external_components_ids();
-        let mut components: Vec<*const c_void> = vec![];
-        crate::query::get_external_components(world, component_type_ids.to_vec(), &mut components);
+ptr_ffi!(
+    fn get_component(world_ptr: *mut World, id: u32) -> Result<*const c_void, &'static str> {
+        unsafe{
+            let world = (world_ptr as *mut legion::world::World).as_mut().expect("Failed to cast *mut World to &mut legion::systems::World");
+            let component_type_ids = crate::query::get_external_components_ids();
+            let mut components: Vec<*const c_void> = vec![];
+            crate::query::get_external_components(world, component_type_ids.to_vec(), &mut components);
         
-        debug!("COMPONENTS {:?}", components);
-        components[0]
+            debug!("COMPONENTS {:?}", components);
+            Ok(components[0])
+        }
     }
-            
-}
+);

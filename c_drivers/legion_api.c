@@ -7,7 +7,6 @@ typedef struct CommandBuffer CommandBuffer;
 typedef struct ComponentData ComponentData;
 
 extern void legion_create_entity(World* world, ComponentData* component_data);
-extern void rust_print_func(ComponentData* component_data);
 extern void** component_array(void* component);
 extern ComponentData* legion_create_component_data(int* component_types, int number_components, void** components);
 extern World* legion_world_new();
@@ -44,7 +43,6 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
     fprintf(stderr, "size of pyobject* %d\n", sizeof(PyObject*));
     fprintf(stderr, "size of temp %d\n", sizeof(*temp));
 
-    // This breaks if user pass more than one argument to function
     for(Py_ssize_t i=0; i<args_size; i++) {
         temp = PyTuple_GetItem(args, i);
         
@@ -58,7 +56,6 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
     fprintf(stderr, "components pointer %p\n", temp);
     
     ComponentData* comp_data = legion_create_component_data(component_types, 1, temp);
-    rust_print_func(comp_data);
     legion_create_entity(get_world(), comp_data);
 
     return PY_NONE;

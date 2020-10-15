@@ -5,7 +5,6 @@ use std::convert::TryInto;
 use crate::c_api::World;
 use log::*;
 extern {
-    // fn C_run_python_file(source: *const c_char);
     fn C_RUN_PYSCRIPT(world: *mut World, source: *const c_char, component_id: *mut c_ulong);
 }
 

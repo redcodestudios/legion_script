@@ -15,21 +15,24 @@ use std::slice;
 use std::any::TypeId;
 use log::*;
 
-fn get_component_from_storage(world: &legion::world::World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void{
+fn get_component_from_storage(world: &legion::world::World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void {
     trace!("Get component from storage - start");
     if !archetype.layout().has_component_by_id(*id) {
+        //@TODO: change to a Result, this will break if we have two archetypes
         panic!("Archetype's layout doesn't contain the required component id");
     }
-    debug!("{:?}", archetype.entities()); 
+
+    debug!("Archetype entities {:?}", archetype.entities());
+
     let storage = world.components().get(*id).unwrap();
-    debug!("storage: {:?}", storage as *const _ as *const c_void);
+    
     let (slice_ptr, len) = storage.get_raw(archetype.index()).expect("Failed to get raw component");
     let component: *const c_void;
     unsafe {
         let size = std::mem::size_of::<ExternalComponent>();
         let slice = slice::from_raw_parts(slice_ptr as *const _, size);
         component = convert_bytes_into_pointer(slice);
-        debug!("transmutei {:?}", component);
+        info!("Transmutei {:?}", component);
     }
     
     trace!("Get component from storage - end");
@@ -39,9 +42,10 @@ fn get_component_from_storage(world: &legion::world::World, archetype: &Archetyp
 pub fn get_external_components(world: &legion::world::World, component_type_ids: Vec<ComponentTypeId>,components: &mut Vec<*const c_void>){
     trace!("Get external components - start");
     for archetype in world.archetypes() {
-        debug!("Archetype: {:?}", archetype);
+        debug!("Archetype: {:?}\n", archetype);
         for id in component_type_ids.iter() {
-            debug!("Getting id {:?}", id);
+            info!("Getting component with id = {:?}", id);
+            //@TODO: validate Result before pushing to the vec, what result? see TODO above
             let component: *const c_void = get_component_from_storage(&world, archetype, id); 
             components.push(component);           
         }

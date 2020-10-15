@@ -28,11 +28,6 @@ pub struct ComponentData {
     pub layout: EntityLayout,
 }
 
-// impl legion::systems::KnownLength for ComponentData {
-//     fn len(&self) -> usize {
-//         self.number_components as usize
-//     }
-// }
 use log::*;
 
 impl ArchetypeSource for ComponentData {
@@ -49,7 +44,7 @@ impl ArchetypeSource for ComponentData {
         trace!("layout - start");
         let constructor = || {
             let storage = Box::new(PackedStorage::<ExternalComponent>::default()) as Box<dyn UnknownComponentStorage>;
-            debug!("REGISTERING storage: {:?}", &*storage as *const _ as *const c_void);
+            info!("REGISTERING storage: {:?}", &*storage as *const _ as *const c_void);
             return storage
         };
         let mut ids: Vec<ComponentTypeId> = Vec::new();
@@ -97,18 +92,15 @@ impl storage::ComponentSource for ComponentData {
                     name: "external component"
                 };
                 ids.push(id);
-                
-                // self.layout.register_component_raw(id,constructor);
-                
             }
         }
         
         for id in ids{
-            debug!("Layout has the component id [{:?}], name [{}]? {}", id.ext_type_id, id.name, self.layout.has_component_by_id(id));
+            info!("Layout has the component id [{:?}]? {}", id.ext_type_id, self.layout.has_component_by_id(id));
         }
         for e in entities {
             writer.push(e);
-            debug!("Creating entity - {:?}", e);
+            info!("Creating entity - {:?}", e);
             break;
         }
         
@@ -123,12 +115,9 @@ impl storage::ComponentSource for ComponentData {
                         name: "external component"
                     }
                 );
-                debug!("size of External component {}",std::mem::size_of::<ExternalComponent>());
-                debug!("unknown_component_writer_storage: {:?}", unkown_component_writer.components as *const _ as *const c_void);
                 let comp_ptr = (*self).components.offset(component_index as isize);
                 debug!("component pointer before storage magic: {:?}", comp_ptr);
                 let black_magic: *const *const c_void = &[comp_ptr as *const c_void] as *const *const c_void;
-                debug!("pushing black_magic_ptr: {:?}", black_magic);
                 unkown_component_writer.extend_memcopy_raw(black_magic as *mut u8, 1);
             }
         }
