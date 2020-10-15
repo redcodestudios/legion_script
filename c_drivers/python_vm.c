@@ -5,52 +5,26 @@
 #include <structmember.h>
 #include <string.h>
 
-#define PY_NONE Py_BuildValue("")
+#include "legion.c"
 
-/* typedef void(*World)(void*); */
-/* typedef void(*ComponentData)(void*, ); */
-
-typedef struct World World;
-typedef struct CommandBuffer CommandBuffer;
-typedef struct ComponentData ComponentData;
-
-extern void legion_create_entity(World* world, ComponentData* component_data);
-extern void rust_print_func(ComponentData* component_data);
-extern void** component_array(void* component);
-extern ComponentData* legion_create_component_data(int* component_types, int number_components, void** components);
-extern World* legion_world_new();
-
-extern void* get_component(World* world, int id);
-
-static unsigned long *counter = NULL;
-static World *WORLD = NULL;
-
-/* static unsigned long get_counter() { */
-/*     return *counter; */
-/* } */
-
-/* void set_counter(unsigned long id) { */
-/*    *counter = id; */ 
-/* } */
-
-static PyObject* py_obj_ptr = NULL;
 
 typedef struct {
     PyTypeObject base;
     unsigned long type_id;
 } MetaObject;
 
-static PyObject *
-Meta_id(MetaObject *self, PyObject *unused)
-{
+
+static PyObject* Meta_id(MetaObject *self, PyObject *unused){
     return PyLong_FromLong(self->type_id);
 }
+
 
 static PyMethodDef Meta_methods[] = {
     {"id", (PyCFunction) Meta_id, METH_NOARGS,
      PyDoc_STR("get type id")},
     {NULL},
 };
+
 
 static PyObject *Meta_new(PyObject *cls, PyObject *args, PyObject *kwargs) {
     MetaObject *component_class = PyType_Type.tp_new(cls, args, kwargs);
@@ -61,6 +35,7 @@ static PyObject *Meta_new(PyObject *cls, PyObject *args, PyObject *kwargs) {
     fprintf(stderr, "CREATING COMPONENT\n"); 
     return component_class;
 }
+
 
 static PyTypeObject MetaComponentType = {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -81,70 +56,6 @@ static PyObject* say_hello(PyObject *self, PyObject *args) {
     return PY_NONE;
 }
 
-/** new entity **/
-static PyObject* new_entity(PyObject *self, PyObject *args) {
-    int component_types[1] = {666};
-    void* components = NULL;
-    
-    Py_ssize_t args_size = PyTuple_Size(args);
-    fprintf(stderr, "NUMBER DE ARGS %d\n", (int) args_size);
-
-    PyObject *temp;
-
-    components = malloc(sizeof(PyObject*));
-    fprintf(stderr, "size of pyobject* %d\n", sizeof(PyObject*));
-    fprintf(stderr, "size of temp %d\n", sizeof(*temp));
-
-    // This breaks if user pass more than one argument to function
-    for(Py_ssize_t i=0; i<args_size; i++) {
-        temp = PyTuple_GetItem(args, i);
-        
-        // TEST IF PTR IS CLEANED
-        py_obj_ptr = temp;
-        Py_INCREF(temp);
-
-        components = temp;
-        PyObject_CallMethodObjArgs(temp, PyUnicode_FromString("string"), NULL);
-        //  PyObject* class = PyObject_GetAttrString(temp, "__class__");
-        /* if(class == NULL) { */
-        /*     fprintf(stderr, "CLASS NOT FOUND\n"); */
-        /* } */
-
-        /* PyObject* id = PyObject_CallMethodObjArgs(class, PyUnicode_FromString("id"), NULL); */
-        /* if (id == NULL) { */
-        /*     fprintf(stderr, "ID NOT FOUND \n"); */
-        /* } */
-        /* Py_DECREF(temp); */
-        /* Py_DECREF(id); */
-        /* Py_DECREF(class); */
-        /* fprintf(stderr, "TYPE_ID: %ld\n", PyLong_AsLong(id)); */
-        /* PyErr_Print(); */
-    }
-    
-    fprintf(stderr, "components pointer %p\n", temp);
-    
-    ComponentData* comp_data = legion_create_component_data(component_types, 1, temp);
-    rust_print_func(comp_data);
-    legion_create_entity(WORLD, comp_data);
-
-
-    
-    return PY_NONE;
-}
-
-static PyObject* query(PyObject *self, PyObject *args) {
-
-    void** new_component = get_component(WORLD, 666);
-
-    // fprintf(stderr, "components array pointer voltando %p\n", new_component);
-
-    PyObject* query_result = Py_BuildValue("O", (PyObject*) new_component); 
-    
-    if(query_result == NULL) {
-        fprintf(stderr, "query_result null\n");
-    }
-    return query_result;
-}
 
 static PyMethodDef EngineMethods[] = {
     {"say_hello", say_hello, METH_VARARGS, "Say hello from python."},
@@ -153,16 +64,14 @@ static PyMethodDef EngineMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-
 /** MODULE ENGINE INIT **/
 static PyModuleDef EngineModule = {
     PyModuleDef_HEAD_INIT, "engine", NULL, -1, EngineMethods,
     NULL, NULL, NULL, NULL
 };
 
-static PyObject*
-PyInit_engine(void)
-{
+
+static PyObject* PyInit_engine(void) {
     PyObject* module = PyModule_Create(&EngineModule);
     MetaComponentType.tp_base = &PyType_Type;
     
@@ -176,6 +85,7 @@ PyInit_engine(void)
     
     return module;
 }
+
 
 /** RUN SCRIPT **/
 void C_RUN_PYSCRIPT(World* world, const char* script, unsigned long *component_id) {
