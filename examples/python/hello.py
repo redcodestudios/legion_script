@@ -9,7 +9,7 @@ class Color(metaclass=engine.MetaComponent):
     def __init__(self, r, g, b):
         self.r, self.g, self.b = (r,g,b)
     def string(self):
-        print(f"{self.r} {self.g} {self.b}")
+        print(f"Color values: {self.r} {self.g} {self.b}")
 
 class Transform(metaclass=engine.MetaComponent):
     def __init__(self, x, y):
@@ -24,8 +24,9 @@ print(f'Transform type_id: {Transform.id()}')
 # print(f'Color type_id: {Color.__type_id__}')
 # print(f'Transform type_id: {Transform.__type_id__}')
 e = engine.new_entity(Color(55,2,3))
-# c = engine.query()
-# print(f"C {c}")
+c = engine.query()
+print(f"C {c}")
+c.string()
 
 # class Rotation(metaclass=engine.MetaComponent):
 #     pass

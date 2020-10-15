@@ -128,21 +128,17 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
     legion_create_entity(WORLD, comp_data);
 
 
-    void** new_component = get_component(WORLD, 666);
-
-    fprintf(stderr, "components pointer voltando %p\n", new_component);
-    // fprintf(stderr, "components array pointer voltando %p\n", new_component);
-
-    fprintf(stderr, "isadsadijadsijadsji\n\n\n\n", components);
-    PyObject_CallMethodObjArgs((PyObject*) new_component, PyUnicode_FromString("string"), NULL);
+    
     return PY_NONE;
 }
 
 static PyObject* query(PyObject *self, PyObject *args) {
-    if(py_obj_ptr == NULL) {
-        fprintf(stderr, "obj is null\n");
-    }
-    PyObject* query_result = Py_BuildValue("O", py_obj_ptr); 
+
+    void** new_component = get_component(WORLD, 666);
+
+    // fprintf(stderr, "components array pointer voltando %p\n", new_component);
+
+    PyObject* query_result = Py_BuildValue("O", (PyObject*) new_component); 
     
     if(query_result == NULL) {
         fprintf(stderr, "query_result null\n");
