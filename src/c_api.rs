@@ -51,8 +51,8 @@ ptr_ffi!(
         unsafe {
             let world = (world_ptr as *mut legion::world::World).as_mut().expect("Failed to cast *mut World to &mut legion::systems::World");
             debug!("world len {}", world.len());
-            world.extend((*component_data).clone());
-            // world.extend(create_test_component_data());
+            // world.extend((*component_data).clone());
+            world.extend(create_test_component_data());
             debug!("component data pointer {:?}", (*component_data).components);
             Ok(world as *mut legion::World as *mut World)
         }

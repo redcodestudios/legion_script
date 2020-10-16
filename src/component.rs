@@ -104,7 +104,6 @@ impl storage::ComponentSource for ComponentData {
             break;
         }
         
-        
         for component_index in 0..self.number_components{
             info!("storing components - #{}", component_index);
             unsafe {
@@ -115,7 +114,7 @@ impl storage::ComponentSource for ComponentData {
                         name: "external component"
                     }
                 );
-                let comp_ptr = (*self).components.offset(component_index as isize);
+                let comp_ptr = *(self.components).offset(component_index as isize);
                 debug!("component pointer before storage magic: {:?}", comp_ptr);
                 let black_magic: *const *const c_void = &[comp_ptr as *const c_void] as *const *const c_void;
                 unkown_component_writer.extend_memcopy_raw(black_magic as *mut u8, 1);

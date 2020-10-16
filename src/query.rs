@@ -53,10 +53,15 @@ pub fn get_external_components(world: &legion::world::World, component_type_ids:
     trace!("Get external components - end");
 }
 
-pub fn get_external_components_ids() -> [ComponentTypeId;1]{
+pub fn get_external_components_ids() -> [ComponentTypeId;2]{
     [ComponentTypeId { 
         type_id: TypeId::of::<ExternalComponent>(),
         ext_type_id: Some(666),
+        name: "external component"
+    },
+    ComponentTypeId { 
+        type_id: TypeId::of::<ExternalComponent>(),
+        ext_type_id: Some(777),
         name: "external component"
     }]
 }

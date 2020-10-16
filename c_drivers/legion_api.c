@@ -31,15 +31,15 @@ static void set_pyobject(PyObject* p){
 }
 
 static PyObject* new_entity(PyObject *self, PyObject *args) {
-    int component_types[1] = {666};
-    void* components = NULL;
+    int component_types[2] = {666, 777};
+    void* components[2];
     
     Py_ssize_t args_size = PyTuple_Size(args);
     fprintf(stderr, "NUMBER DE ARGS %d\n", (int) args_size);
 
     PyObject *temp;
 
-    components = malloc(sizeof(PyObject*));
+    /* components = malloc(sizeof(PyObject*)); */
     fprintf(stderr, "size of pyobject* %d\n", sizeof(PyObject*));
     fprintf(stderr, "size of temp %d\n", sizeof(*temp));
 
@@ -49,13 +49,15 @@ static PyObject* new_entity(PyObject *self, PyObject *args) {
         set_pyobject(temp);
         Py_INCREF(temp);
 
-        components = temp;
-        PyObject_CallMethodObjArgs(temp, PyUnicode_FromString("string"), NULL);
+        components[i] = (void*) temp;
+        /* PyObject_CallMethodObjArgs(temp, PyUnicode_FromString("string"), NULL); */
     }
     
-    fprintf(stderr, "components pointer %p\n", temp);
+    fprintf(stderr, "component in position 0 %p\n", components[0]);
+    fprintf(stderr, "component in position 1 %p\n", components[1]);
+    fprintf(stderr, "component array %p\n", components);
     
-    ComponentData* comp_data = legion_create_component_data(component_types, 1, temp);
+    ComponentData* comp_data = legion_create_component_data(component_types, 2, components);
     legion_create_entity(get_world(), comp_data);
 
     return PY_NONE;
