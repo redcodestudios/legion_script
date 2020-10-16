@@ -5,7 +5,7 @@
 #include <structmember.h>
 #include <string.h>
 
-#include "legion_api.c"
+#include "legion_api.h"
 
 
 typedef struct {
@@ -30,8 +30,8 @@ static PyObject *Meta_new(PyObject *cls, PyObject *args, PyObject *kwargs) {
     MetaObject *component_class = PyType_Type.tp_new(cls, args, kwargs);
     
     /*** Change to actual get_id from RUST ***/
-    *counter += 1;
-    component_class->type_id = *counter;
+    *ID_COUNTER += 1;
+    component_class->type_id = *ID_COUNTER;
     fprintf(stderr, "CREATING COMPONENT\n"); 
     return component_class;
 }
@@ -91,7 +91,7 @@ static PyObject* PyInit_engine(void) {
 void C_RUN_PYSCRIPT(World* world, const char* script, unsigned long *component_id) {
     
     // SET RUST ID
-    counter = component_id;
+    ID_COUNTER = component_id;
     
     // SET WORLD
     //@TODO: create world singleton in C

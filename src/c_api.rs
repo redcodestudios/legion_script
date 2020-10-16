@@ -2,12 +2,17 @@ extern crate legion;
 
 extern crate easy_ffi;
 
+use legion::{
+    storage::ComponentTypeId,
+};
+
 use easy_ffi::*;
 
 use std::ffi::c_void;
 
-use crate::component::ComponentData;
-use crate::utils::create_test_component_data;
+use crate::component::{ComponentData, ExternalComponent};
+
+use std::any::TypeId;
 
 use log::*;
 
@@ -51,8 +56,7 @@ ptr_ffi!(
         unsafe {
             let world = (world_ptr as *mut legion::world::World).as_mut().expect("Failed to cast *mut World to &mut legion::systems::World");
             debug!("world len {}", world.len());
-            // world.extend((*component_data).clone());
-            world.extend(create_test_component_data());
+            world.extend((*component_data).clone());
             debug!("component data pointer {:?}", (*component_data).components);
             Ok(world as *mut legion::World as *mut World)
         }
@@ -78,9 +82,14 @@ ptr_ffi!(
     fn get_component(world_ptr: *mut World, id: u32) -> Result<*const c_void, &'static str> {
         unsafe{
             let world = (world_ptr as *mut legion::world::World).as_mut().expect("Failed to cast *mut World to &mut legion::systems::World");
-            let component_type_ids = crate::query::get_external_components_ids();
+            let component_type_ids = vec![ComponentTypeId { 
+                type_id: TypeId::of::<ExternalComponent>(),
+                ext_type_id: Some(id),
+                name: "external component"
+            }];
+
             let mut components: Vec<*const c_void> = vec![];
-            crate::query::get_external_components(world, component_type_ids.to_vec(), &mut components);
+            crate::query::get_external_components(world, component_type_ids, &mut components);
         
             debug!("COMPONENTS {:?}", components);
             Ok(components[0])
