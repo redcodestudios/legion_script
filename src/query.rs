@@ -7,51 +7,47 @@ use legion::{
 use crate::{
     component::{ExternalComponent},
     driver::{convert_bytes_into_pointer},
-    component::{ComponentData}
 };
 use std::os::raw::c_void;
 use std::slice;
 
-use std::any::TypeId;
+use log::*;
 
-fn get_component_from_storage(world: &legion::world::World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void{
+fn get_component_from_storage(world: &legion::world::World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void {
+    trace!("Get component from storage - start");
     if !archetype.layout().has_component_by_id(*id) {
+        //@TODO: change to a Result, this will break if we have two archetypes
         panic!("Archetype's layout doesn't contain the required component id");
     }
-    println!("{:?}", archetype.entities()); 
+
+    debug!("Archetype entities {:?}", archetype.entities());
+
     let storage = world.components().get(*id).unwrap();
-    println!("storage: {:?}", storage as *const _ as *const c_void);
+    
     let (slice_ptr, len) = storage.get_raw(archetype.index()).expect("Failed to get raw component");
     let component: *const c_void;
     unsafe {
         let size = std::mem::size_of::<ExternalComponent>();
         let slice = slice::from_raw_parts(slice_ptr as *const _, size);
         component = convert_bytes_into_pointer(slice);
-        println!("transmutei {:?}", component);
+        info!("Transmutei {:?}", component);
     }
-
+    
+    trace!("Get component from storage - end");
     component
 }
 
 pub fn get_external_components(world: &legion::world::World, component_type_ids: Vec<ComponentTypeId>,components: &mut Vec<*const c_void>){
+    trace!("Get external components - start");
     for archetype in world.archetypes() {
-        println!("Archetype: {:?}", archetype);
+        debug!("Archetype: {:?}\n", archetype);
         for id in component_type_ids.iter() {
+            info!("Getting component with id = {:?}", id);
+            //@TODO: validate Result before pushing to the vec, what result? see TODO above
             let component: *const c_void = get_component_from_storage(&world, archetype, id); 
-            println!("Getting id {:?}", id);
             components.push(component);           
         }
     }
+    trace!("Get external components - end");
 }
 
-pub fn get_external_components_ids() -> [ComponentTypeId;2]{
-    [ComponentTypeId { 
-        type_id: TypeId::of::<ExternalComponent>(),
-        ext_type_id: Some(666),
-        name: "external component"
-    }, ComponentTypeId { 
-        type_id: TypeId::of::<ExternalComponent>(),
-        ext_type_id: Some(777),
-        name: "external component"
-    }]
-}
