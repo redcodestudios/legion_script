@@ -1,43 +1,24 @@
 import engine
 
-# engine.say_hello()
-# print(f'Engine module: {dir(engine)}')
-# print(f'MetaComponent type: {type(engine.MetaComponent)}')
-# print(f'MetaComponent dir: {dir(engine.MetaComponent)}')
-# print(engine.MetaComponent.id())
 class Color(metaclass=engine.MetaComponent):
     def __init__(self, r, g, b):
         self.r, self.g, self.b = (r,g,b)
     def string(self):
-        print(f"Color values: {self.r} {self.g} {self.b}")
+        print(f"Color RGB: {self.r} {self.g} {self.b}")
 
 class Transform(metaclass=engine.MetaComponent):
     def __init__(self, x, y):
         self.x, self.y = (x, y)
 
-# print(f'Color dir: {dir(Color)}')
-# print(f'Component type: {type(Color)}')
 print(f'Color type_id: {Color.id()}')
 print(f'Transform type_id: {Transform.id()}')
-# print(dir(Component))
-# print(dir(Color))
-# print(f'Color type_id: {Color.__type_id__}')
-# print(f'Transform type_id: {Transform.__type_id__}')
+
 engine.new_entity(Color(55,2,3), Transform(10, 20))
 engine.new_entity(Color(6, 6, 6))
-engine.new_entity(Color(67, 6, 6))
-# engine.new_entity(Color(68, 6, 6))
-# engine.new_entity(Color(69, 6, 6))
+engine.new_entity(Color(666, 666, 666))
 
 result = engine.query(Color)
-print(result)
 for c in result:
     c.string()
 
-# class Rotation(metaclass=engine.MetaComponent):
-#     pass
-# # print(dir(c))
-
-# c = engine.query()
-# print(f"C {c}")
 

@@ -94,8 +94,8 @@ ptr_ffi!(
                 name: "external component"
             }];
 
-            // Had to start with null because C was ignoring components[0]
-            let mut components: Vec<*const c_void> = vec![std::ptr::null()];
+            // Had to start with null because C was ignoring components[0] and [1]
+            let mut components: Vec<*const c_void> = vec![std::ptr::null(),std::ptr::null()];
             crate::query::get_external_components(world, component_type_ids, &mut components);
         
             debug!("COMPONENTS {:?}", components);

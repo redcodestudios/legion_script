@@ -84,10 +84,10 @@ static PyObject* query(PyObject *self, PyObject *args) {
         fprintf(stderr, "meta id %d\n", id);
         new_components = get_component(get_world(), id);
 
-        // First value on new_components is NULL, vec starts on [1]; thats why len-1, and i=1;
-        fprintf(stderr, "C received [%d] components.\n", new_components->len - 1);
-        for(int i = 1; i<new_components->len; i++){
-            fprintf(stderr, "%p %d\n", new_components->data[i], i);
+        // First values on new_components is NULL, vec starts on [2]; thats why len-2, and i=2;
+        fprintf(stderr, "C received [%d] components.\n", new_components->len - 2);
+        for(int i = 2; i<new_components->len; i++){
+            // fprintf(stderr, "%p %d\n", new_components->data[i], i);
             if(PyList_Append(query_result, (PyObject*) new_components->data[i]) == -1) {
                 fprintf(stderr, "Failed to insert in query result list.\n");
             }
