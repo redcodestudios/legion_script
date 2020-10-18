@@ -50,6 +50,12 @@ pub struct World;
 #[repr(C)]
 pub struct CommandBuffer;
 
+#[repr(C)]
+pub struct ComponentsWrapper{
+    data: *const c_void,
+    len: usize,
+}
+
 ptr_ffi!(
     fn legion_create_entity(world_ptr: *mut World, component_data: *mut ComponentData) -> Result<*mut World, &'static str> {
         info!("Creating entity");
@@ -88,11 +94,15 @@ ptr_ffi!(
                 name: "external component"
             }];
 
-            let mut components: Vec<*const c_void> = vec![];
+            // Had to start with null because C was ignoring components[0]
+            let mut components: Vec<*const c_void> = vec![std::ptr::null()];
             crate::query::get_external_components(world, component_type_ids, &mut components);
         
             debug!("COMPONENTS {:?}", components);
-            Ok(components[0])
+            Ok(&ComponentsWrapper{
+                data : components.as_ptr() as *const c_void,
+                len : components.len()
+            } as *const _ as *const c_void)
         }
     }
 );

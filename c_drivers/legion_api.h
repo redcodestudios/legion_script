@@ -9,7 +9,11 @@ typedef struct ComponentData ComponentData;
 // LEGION INTERFACE
 extern void legion_create_entity(World* world, ComponentData* component_data);
 extern ComponentData* legion_create_component_data(int* component_types, int number_components, void** components);
-extern void* get_component(World* world, int id);
+typedef struct ComponentsWrapper{
+    void** data;
+    int len;
+}ComponentsWrapper;
+extern ComponentsWrapper* get_component(World* world, int id);
 
 static unsigned long* ID_COUNTER = 0;
 static World* WORLD = NULL;
@@ -68,7 +72,7 @@ static PyObject* query(PyObject *self, PyObject *args) {
     Py_ssize_t args_size = PyTuple_Size(args);
 
     PyObject* temp;
-    void** new_component = NULL;
+    ComponentsWrapper* new_components = NULL;
 
     PyObject* query_result = PyList_New(0);
 
@@ -78,10 +82,15 @@ static PyObject* query(PyObject *self, PyObject *args) {
         
         unsigned long id = get_component_id_by_class(temp);
         fprintf(stderr, "meta id %d\n", id);
-        new_component = get_component(get_world(), id);
+        new_components = get_component(get_world(), id);
 
-        if(PyList_Append(query_result, (PyObject*) new_component) == -1) {
-            fprintf(stderr, "Failed to insert in query result list.\n");
+        // First value on new_components is NULL, vec starts on [1]; thats why len-1, and i=1;
+        fprintf(stderr, "C received [%d] components.\n", new_components->len - 1);
+        for(int i = 1; i<new_components->len; i++){
+            fprintf(stderr, "%p %d\n", new_components->data[i], i);
+            if(PyList_Append(query_result, (PyObject*) new_components->data[i]) == -1) {
+                fprintf(stderr, "Failed to insert in query result list.\n");
+            }
         }
     }
 
