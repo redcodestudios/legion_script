@@ -1,10 +1,22 @@
-use crate::{
-    components::{Position, Rotation},
-    component::{ComponentData}
-};
+use crate::component::ComponentData;
 
 use std::os::raw::c_void;
-use legion::storage::EntityLayout;
+use legion::storage::{EntityLayout,ComponentTypeId};
+use crate::component::ExternalComponent;
+
+use std::any::TypeId;
+
+#[derive(Debug)]
+pub struct Rotation {
+    pub x: u32
+}
+
+#[derive(Debug)]
+#[repr(C)]
+pub struct Position {
+    pub x: u32,
+    pub y: u32
+}
 
 pub fn create_test_component_data() -> ComponentData{
     let component_types = [666, 777].as_ptr() as *const u32;
@@ -25,4 +37,17 @@ pub fn create_test_component_data() -> ComponentData{
         layout: layout,
     };
     component_data
+}
+
+pub fn create_test_component_ids() -> [ComponentTypeId;2]{
+    [ComponentTypeId { 
+        type_id: TypeId::of::<ExternalComponent>(),
+        ext_type_id: Some(666),
+        name: "external component"
+    },
+    ComponentTypeId { 
+        type_id: TypeId::of::<ExternalComponent>(),
+        ext_type_id: Some(777),
+        name: "external component"
+    }]
 }

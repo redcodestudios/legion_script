@@ -7,12 +7,10 @@ use legion::{
 use crate::{
     component::{ExternalComponent},
     driver::{convert_bytes_into_pointer},
-    component::{ComponentData}
 };
 use std::os::raw::c_void;
 use std::slice;
 
-use std::any::TypeId;
 use log::*;
 
 fn get_component_from_storage(world: &legion::world::World, archetype: &Archetype, id: &ComponentTypeId) -> *const c_void {
@@ -53,15 +51,3 @@ pub fn get_external_components(world: &legion::world::World, component_type_ids:
     trace!("Get external components - end");
 }
 
-pub fn get_external_components_ids() -> [ComponentTypeId;2]{
-    [ComponentTypeId { 
-        type_id: TypeId::of::<ExternalComponent>(),
-        ext_type_id: Some(666),
-        name: "external component"
-    },
-    ComponentTypeId { 
-        type_id: TypeId::of::<ExternalComponent>(),
-        ext_type_id: Some(777),
-        name: "external component"
-    }]
-}

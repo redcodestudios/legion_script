@@ -1,19 +1,12 @@
 extern crate legion;
-
 extern crate easy_ffi;
 
-use legion::{
-    storage::ComponentTypeId,
-};
-
+use crate::component::{ComponentData, ExternalComponent};
+use legion::storage::ComponentTypeId;
 use easy_ffi::*;
 
 use std::ffi::c_void;
-
-use crate::component::{ComponentData, ExternalComponent};
-
 use std::any::TypeId;
-
 use log::*;
 
 easy_ffi!(void_ffi =>

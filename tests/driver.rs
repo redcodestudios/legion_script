@@ -1,13 +1,8 @@
-use legion_script::*;
 use legion::*;
 use legion::world::World;
 
 use legion_script::{
-    system::{Scripts, scripting_system},
-    system::ComponentId,
-    query::{get_external_components_ids},
-    components::{Rotation, Position},
-    utils::{create_test_component_data},
+    utils::{Position, Rotation,create_test_component_data, create_test_component_ids},
     query::{get_external_components}
 };
 
@@ -27,24 +22,22 @@ fn insert_entities_into_world(){
 }
 
 // #[test]
-fn run_python_script() {
-    let mut id_count = 0_u64;
-    driver::run_script(
-        String::from("tests/scripts/print.py"), &mut id_count);
-    assert_eq!(0,0);
-}
+// fn run_python_script() {
+//     let mut id_count = 0_u64;
+//     driver::run_script(
+//         String::from("tests/scripts/print.py"), &mut id_count);
+//     assert_eq!(0,0);
+// }
 
 
 #[test]
-fn raw_component(){
+fn transmute_components_from_world(){
     let mut world = World::default();
-    let mut resources = Resources::default();
 
-    
     let component_data = create_test_component_data();
     let entities = world.extend(component_data);
 
-    let component_type_ids = get_external_components_ids();
+    let component_type_ids = create_test_component_ids();
     let mut components: Vec<*const c_void> = vec![];
     
     get_external_components(&world, component_type_ids.to_vec(), &mut components);
@@ -58,17 +51,27 @@ fn raw_component(){
         let rotation = std::mem::transmute::<*const c_void, &Rotation>(components[1]);
         assert_eq!(50, rotation.x);
     }
+}
+
+#[test]
+fn get_multiple_components(){
+    let mut world = World::default();
+
+    for _ in 0..10{
+        world.extend(create_test_component_data());
+    } 
+
+    let component_type_ids = create_test_component_ids();
+    let mut components: Vec<*const c_void> = vec![];
     
-    let id_count = 0;
-    resources.insert::<ComponentId>(id_count);
+    let vec_with_position_id = vec![component_type_ids.to_vec()[0]];
+    get_external_components(&world, vec_with_position_id, &mut components);
     
-    let scripts = vec![String::from("examples/python/hello.py"), String::from("examples/python/hello2.py")];
-    resources.insert::<Scripts>(scripts);
-
-
-    let mut schedule = Schedule::builder()
-        .add_system(scripting_system())
-        .build();
-
-    schedule.execute(&mut world, &mut resources);
+    unsafe{
+        for i in 0..10{
+            let position = std::mem::transmute::<*const c_void, &Position>(components[i]);
+            assert_eq!(100, position.x);
+            assert_eq!(50, position.y);
+        }
+    }
 }
