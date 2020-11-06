@@ -5,7 +5,7 @@ authors = ["Rodrigo Oliveira <rodrigo.redcode@gmail.com>"]
 edition = "2018"
 
 [build-dependencies]
-cbindgen = "0.14.4"
+cbindgen = "0.14.3"
 cc = "1.0.59"
 
 [dependencies]
