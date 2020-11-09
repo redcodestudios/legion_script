@@ -1,5 +1,5 @@
-extern crate cc;
 extern crate cbindgen;
+extern crate cc;
 
 use std::env;
 use std::process::Command;
@@ -27,8 +27,8 @@ fn main() {
     cc::Build::new()
         .include(formatted_python_includes)
         .flag("-lpython3.7m")
-        .file("c_drivers/python_vm.c")
-        .compile("python_vm");
+        .file("c_drivers/vm.c")
+        .compile("python");
 
     println!("{}", format!("cargo:rustc-flags={}", String::from_utf8_lossy(&ldflags.stdout)));
 }

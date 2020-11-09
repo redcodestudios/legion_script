@@ -1,8 +1,8 @@
-use legion::{
-        query::{LayoutFilter, FilterResult,DynamicFilter, Fetch, Any, GroupMatcher}, 
-        world::WorldId
-    };
 use legion::storage::ComponentTypeId;
+use legion::{
+    query::{Any, DynamicFilter, Fetch, FilterResult, GroupMatcher, LayoutFilter},
+    world::WorldId,
+};
 
 #[derive(Default)]
 pub struct ExternalLayoutFilter;
@@ -32,11 +32,11 @@ struct ExternalDynFilter {
     pub filter: Any,
 }
 
-impl DynamicFilter for ExternalDynFilter{
+impl DynamicFilter for ExternalDynFilter {
     fn prepare(&mut self, world_id: WorldId) {
         self.filter.prepare(world_id);
     }
-    fn matches_archetype<T:Fetch>(&mut self, fetch: &T) -> FilterResult{
+    fn matches_archetype<T: Fetch>(&mut self, _fetch: &T) -> FilterResult {
         trace!("matches_archetype - start");
         let result = FilterResult::Match(true);
         trace!("matches_archetype - end");

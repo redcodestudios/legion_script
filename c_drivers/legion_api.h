@@ -3,6 +3,8 @@
 
 #define PY_NONE Py_BuildValue("")
 
+#include <stdio.h>
+
 typedef struct World World;
 typedef struct ComponentData ComponentData;
 
@@ -40,7 +42,7 @@ unsigned long get_component_id_by_instance(PyObject* component_ptr) {
     PyObject* component_class = PyObject_GetAttrString(component_ptr, "__class__");
     if(component_class == NULL) {
         fprintf(stderr, "CLASS NOT FOUND\n");
-        return NULL;
+        return -1;
     }
 
     return get_component_id_by_class(component_class);
