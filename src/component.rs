@@ -104,13 +104,15 @@ impl storage::ComponentSource for ComponentData {
             }
         }
 
-        for id in ids {
-            info!(
-                "Layout has the component id [{:?}]? {}",
-                id.ext_type_id,
-                self.layout.has_component_by_id(id)
-            );
-        }
+        // Sanity check only. Should be done without consuming the ids vec
+        // for id in ids {
+        //     info!(
+        //         "Layout has the component id [{:?}]? {}",
+        //         id.ext_type_id,
+        //         self.layout.has_component_by_id(id)
+        //     );
+        // }
+
         for e in entities {
             writer.push(e);
             info!("Creating entity - {:?}", e);
@@ -120,14 +122,8 @@ impl storage::ComponentSource for ComponentData {
         for component_index in 0..self.number_components {
             info!("storing components - #{}", component_index);
             unsafe {
-                let mut unkown_component_writer =
-                    writer.claim_components_unknown(ComponentTypeId {
-                        type_id: TypeId::of::<ExternalComponent>(),
-                        ext_type_id: Some(
-                            *(self.component_types.offset(component_index as isize)) as u32,
-                        ),
-                        name: "external component",
-                    });
+                let id = ids[component_index as usize];
+                let mut unkown_component_writer = writer.claim_components_unknown(id);
                 let comp_ptr = *(self.components).offset(component_index as isize);
                 debug!("component pointer before storage magic: {:?}", comp_ptr);
                 let black_magic: *const *const c_void =
